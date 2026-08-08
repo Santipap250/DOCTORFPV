@@ -33,16 +33,52 @@ logger = logging.getLogger("configdoctor")
 
 import sqlite3, threading as _threading
 
-_DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'community.db')
 _db_lock = _threading.Lock()
 
 
+def _community_db_path() -> str:
+    """Return the community persistence path.
+
+    Priority:
+    1. COMMUNITY_DB_PATH (preferred, explicit production override)
+    2. DATABASE_PATH (legacy compatibility with older docs/envs)
+    3. /var/data/community.db when running on Render or when a persistent
+       disk mount is already present
+    4. local repo data/community.db as the fallback for development
+    """
+    raw_path = (os.environ.get("COMMUNITY_DB_PATH")
+                or os.environ.get("DATABASE_PATH")
+                or "").strip()
+    if raw_path:
+        if raw_path.startswith("sqlite:///"):
+            raw_path = raw_path.replace("sqlite:///", "", 1)
+        if not os.path.isabs(raw_path):
+            raw_path = os.path.abspath(os.path.join(os.path.dirname(__file__), raw_path))
+        return raw_path
+
+    # Render persistent disk convention; works when the mount exists and
+    # remains harmless locally if /var/data is unavailable.
+    if os.environ.get("RENDER") == "true" or os.path.isdir("/var/data"):
+        return "/var/data/community.db"
+
+    return os.path.join(os.path.dirname(__file__), 'data', 'community.db')
+
+
 def _get_db():
-    """Open (or create) the SQLite community DB and ensure tables exist."""
-    os.makedirs(os.path.dirname(_DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(_DB_PATH, check_same_thread=False)
+    """Open (or create) the SQLite community DB and ensure tables exist.
+
+    The path is configurable so production deployments can point at a
+    persistent disk (for example /var/data/community.db on Render), while
+    local development keeps using the repo-local fallback.
+    """
+    db_path = _community_db_path()
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    conn = sqlite3.connect(db_path, check_same_thread=False, timeout=30)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("PRAGMA busy_timeout=5000")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ratings (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,

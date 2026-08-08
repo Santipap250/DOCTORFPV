@@ -66,7 +66,10 @@ Set these environment variables in Render:
 SECRET_KEY=your-strong-secret-key
 TRUST_PROXY=1
 FLASK_DEBUG=0
+COMMUNITY_DB_PATH=/var/data/community.db
 ```
+
+If you want community likes/ratings to persist across restarts, attach a persistent disk in Render and mount it at `/var/data`.
 
 Build command:
 ```bash

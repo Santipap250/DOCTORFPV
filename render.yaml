@@ -17,6 +17,8 @@ services:
         value: "1"
       - key: FORCE_INSECURE
         value: "0"
+      - key: COMMUNITY_DB_PATH
+        value: /var/data/community.db
       - key: PYTHON_VERSION
         value: "3.11.0"
     healthCheckPath: /healthz
