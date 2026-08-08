@@ -39,6 +39,8 @@ python -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32))"
 mkdir -p data static/downloads/osd static/downloads/diff_all
 ```
 
+For production/community data, Render should mount a Persistent Disk at `/var/data` and set `COMMUNITY_DB_PATH=/var/data/community.db`.
+
 ### 6. Run the App
 ```bash
 python app.py
@@ -56,6 +58,8 @@ Use Gunicorn in production:
 gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 60
 ```
 
+SQLite community data is safe for single-server setups. On Render, use a Persistent Disk and point `COMMUNITY_DB_PATH` to that disk.
+
 ---
 
 ## Render Deployment
@@ -68,8 +72,6 @@ TRUST_PROXY=1
 FLASK_DEBUG=0
 COMMUNITY_DB_PATH=/var/data/community.db
 ```
-
-If you want community likes/ratings to persist across restarts, attach a persistent disk in Render and mount it at `/var/data`.
 
 Build command:
 ```bash

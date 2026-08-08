@@ -15,7 +15,7 @@ ConfigDoctor is an FPV drone configuration and analysis tool for checking build 
 - Python
 - Flask
 - Jinja2 templates
-- SQLite for community data (set `COMMUNITY_DB_PATH` to a persistent disk path in production)
+- SQLite for community data
 - Gunicorn for production
 
 ## Run locally
@@ -33,7 +33,8 @@ Open `http://localhost:10000`
 - `Procfile` is configured for Gunicorn
 - Set `SECRET_KEY` in production
 - Set `TRUST_PROXY=1` only when the app is behind a trusted reverse proxy
-- SQLite works for single-server deployments; for production on Render, point `COMMUNITY_DB_PATH` to a persistent disk (for example `/var/data/community.db`) so likes/ratings survive restarts.
+- SQLite works for single-server deployments; for larger deployments, use a proper server-side database
+- Community data path can be configured with `COMMUNITY_DB_PATH` (preferred) or `DATABASE_PATH` (legacy fallback)
 
 ## Project structure
 
@@ -52,3 +53,10 @@ DOCTOR-CONFIG-FPV--main/
 ## License
 
 All rights reserved by the project owner unless a separate license is added.
+
+## Community Database
+
+- `COMMUNITY_DB_PATH` is the preferred path for community data.
+- `DATABASE_PATH` remains supported as a legacy fallback.
+- On Render, mount a Persistent Disk at `/var/data` and set `COMMUNITY_DB_PATH=/var/data/community.db`.
+- SQLite is configured with WAL, a busy timeout, and safer sync settings for production use.
