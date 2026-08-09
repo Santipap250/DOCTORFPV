@@ -41,15 +41,3 @@
   </a>
 </nav>
 
-<script>
-(function(){
-  var toolsBtn = document.querySelector('.js-bottom-tools[data-tools-launcher]');
-  if(!toolsBtn) return;
-  toolsBtn.addEventListener('click', function(e){
-    if(typeof window.openTP === 'function'){
-      e.preventDefault();
-      window.openTP();
-    }
-  });
-}());
-</script>
