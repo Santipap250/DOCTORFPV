@@ -11,6 +11,9 @@
 <title>{% block title %}{{ self.page_og_title() | forceescape }}{% endblock %}</title>
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shell-nav.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shell-page-actions.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shell-footer.css') }}">
 {% set _page_css = self.page_css() %}
 {% if _page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/' ~ _page_css) }}">{% endif %}
 {% block extra_css_links %}{% endblock %}
@@ -20,12 +23,12 @@
 <body{% block body_attrs %}{% endblock %}>
 {% set _chrome %}{% block show_shared_chrome %}true{% endblock %}{% endset %}
 {% block before_nav %}{% endblock %}
-{% if _chrome | trim == "true" %}{% include "partials/nav.html" %}{% endif %}
-{% if _chrome | trim == "true" %}{% include "partials/page_actions.html" %}{% endif %}
+{% if _chrome | trim == "true" %}{% include "partials/nav.html" %}<script src="{{ url_for('static', filename='js/shell-nav.js') }}"></script>{% endif %}
+{% if _chrome | trim == "true" %}{% include "partials/page_actions.html" %}<script src="{{ url_for('static', filename='js/shell-page-actions.js') }}"></script>{% endif %}
 {% block content %}{% endblock %}
 {% if _chrome | trim == "true" %}{% include "partials/footer_nav.html" %}{% endif %}
 {% set _bnav %}{% block show_bottom_nav %}true{% endblock %}{% endset %}
-{% if _chrome | trim == "true" and _bnav | trim == "true" %}{% include "partials/bottom_nav.html" %}{% endif %}
+{% if _chrome | trim == "true" and _bnav | trim == "true" %}{% include "partials/bottom_nav.html" %}<script src="{{ url_for('static', filename='js/shell-bottom-nav.js') }}"></script>{% endif %}
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>
