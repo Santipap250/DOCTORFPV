@@ -231,3 +231,18 @@ body.light .bnav-item{ color:#5b6b76; }
 body.light .bnav-item:active{ background:rgba(5,150,105,0.08); }
 body.light .bnav-item.bnav-act{ color:#059669; }
 body.light .bnav-item.bnav-act svg{ filter:drop-shadow(0 0 4px rgba(5,150,105,0.35)); }
+
+/* ── Batch F: sitewide reduced-motion fallback ──
+   components.css loads unconditionally on every page via base.html, so this
+   is the one place a single rule reaches the whole app. Per-page CSS already
+   has its own targeted reduced-motion overrides (e.g. shell-nav.css) — this
+   is just the safety net for anything those don't cover. Users who haven't
+   set the OS preference are completely unaffected. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
