@@ -1,0 +1,144 @@
+/* static/css/fpv-hub.css — final cleanup: extracted from templates/fpv/index.html (FPV Knowledge Hub), the last file in the repo still carrying an inline <style> block. No logic change. */
+
+        :root {
+            --bg-color: #0f172a;       /* สีพื้นหลัง Dark Slate */
+            --card-bg: #1e293b;        /* สีการ์ด */
+            --primary: #38bdf8;        /* สีฟ้า Tech */
+            --accent: #f43f5e;         /* สีแดงจุดเด่น */
+            --text-main: #f8fafc;      /* สีตัวหนังสือขาว */
+            --text-sub: #94a3b8;       /* สีตัวหนังสือเทา */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;;flex-wrap:wrap}
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .logo span { color: var(--primary); }
+
+        .btn-tool {
+            background: var(--primary);
+            color: #0f172a;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .btn-tool:hover { background: #7dd3fc; }
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 70%);
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-sub);
+            max-width:min(600px,100%);
+            margin: 0 auto;
+        }
+
+        /* --- Grid Layout --- */
+        .container {
+            max-width:min(1000px,100%);
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* --- Card Design --- */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s, border-color 0.2s;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .card p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .card-link {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;;flex-wrap:wrap}
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            border-top: 1px solid #334155;
+            margin-top: 3rem;
+        }
