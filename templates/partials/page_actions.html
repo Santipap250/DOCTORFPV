@@ -30,18 +30,33 @@
 } %}
 {% set _pa_group  = _pa_group_map.get(nav_page, 'explore') %}
 {% set _pa_current = _pa_titles.get(nav_page, 'หน้านี้') %}
-<div class="pa-mbar" role="navigation" aria-label="Page header">
-  <button type="button" class="pa-mbtn" aria-label="ย้อนกลับ" onclick="if(window.history.length>1){history.back()}else{location.href='/'}">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-  </button>
-  <div class="pa-mtitle">{% if nav_page == 'home' %}Drone Analyzer{% else %}{{ _pa_current }}{% endif %}</div>
-  <button type="button" class="pa-mbtn" aria-label="เครื่องมือ" onclick="if(window.openToolsPanel){window.openToolsPanel()}else{var h=document.getElementById('onHam');if(h){h.click()}else{location.href='/app'}}">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-  </button>
-</div>
+<style>
+.pa-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 16px;background:rgba(6,9,14,0.85);border-bottom:1px solid rgba(255,255,255,0.06);
+  font-family:'Sarabun',sans-serif;position:relative;z-index:60;}
+.pa-crumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;color:rgba(200,215,255,0.55);min-width:0;}
+.pa-crumb a{color:rgba(200,215,255,0.7);text-decoration:none;transition:.15s;}
+.pa-crumb a:hover{color:#10c47a;}
+.pa-sep{opacity:.4;}
+.pa-cat{color:rgba(200,215,255,0.45);}
+.pa-current{color:#10c47a;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pa-actions{display:flex;gap:6px;flex-shrink:0;}
+.pa-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;letter-spacing:.02em;
+  padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);
+  color:rgba(220,230,255,0.8);text-decoration:none;cursor:pointer;transition:.15s;font-family:inherit;}
+.pa-btn:hover{border-color:rgba(16,196,122,0.4);color:#10c47a;background:rgba(16,196,122,0.06);}
+.pa-btn.pa-primary{border-color:rgba(16,196,122,0.35);background:rgba(16,196,122,0.08);color:#10c47a;}
+.pa-btn.pa-disabled{opacity:.4;pointer-events:none;}
+@media(max-width:640px){
+  .pa-bar{padding:8px 12px;}
+  .pa-crumb{font-size:11.5px;}
+  .pa-btn span.pa-label{display:none;}
+  .pa-btn{padding:6px 9px;}
+}
+</style>
 <div class="pa-bar" role="navigation" aria-label="Breadcrumb and page actions">
   <nav class="pa-crumb" aria-label="Breadcrumb">
-    <a href="/">🏠 Home</a>
+    <a href="/landing">🏠 Home</a>
     {% if nav_page == 'home' %}
       <span class="pa-sep">/</span><span class="pa-current" aria-current="page">📊 Dashboard</span>
     {% elif nav_page == 'landing' %}
@@ -51,11 +66,8 @@
     {% endif %}
   </nav>
   <div class="pa-actions">
-    <button type="button" class="pa-btn" onclick="if(window.history.length>1){history.back()}else{location.href='/'}">↩ <span class="pa-label">Back</span></button>
-    <a class="pa-btn {% if nav_page=='landing' %}pa-disabled{% endif %}" href="/">🏠 <span class="pa-label">Home</span></a>
-    <button type="button" class="pa-btn pa-tools" onclick="if(window.openToolsPanel){window.openToolsPanel()}else if(location.pathname!='/app'){location.href='/app'}">🛠 <span class="pa-label">Tools</span></button>
+    <button type="button" class="pa-btn" onclick="if(window.history.length>1){history.back()}else{location.href='/landing'}">↩ <span class="pa-label">Back</span></button>
+    <a class="pa-btn {% if nav_page=='landing' %}pa-disabled{% endif %}" href="/landing">🏠 <span class="pa-label">Home</span></a>
     <a class="pa-btn pa-primary {% if nav_page=='home' %}pa-disabled{% endif %}" href="/app">📊 <span class="pa-label">Dashboard</span></a>
   </div>
-
-
 </div>
