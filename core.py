@@ -9,7 +9,6 @@
 # ============================================================
 
 import os, io, re, time, json, hashlib, logging
-from pathlib import Path
 import sqlite3, threading as _threading
 from datetime import datetime
 
@@ -28,50 +27,21 @@ from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 
 
 # ── Logger init — MUST be first before any try/except import blocks ───────
-_log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
-logging.basicConfig(level=getattr(logging, _log_level, logging.INFO))
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
 
 import sqlite3, threading as _threading
 
+_DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'community.db')
 _db_lock = _threading.Lock()
-_DEFAULT_DB_PATH = Path(__file__).resolve().parent / 'data' / 'community.db'
-
-
-def _resolve_community_db_path():
-    """Resolve the community DB path with production-friendly fallback order.
-
-    Priority:
-    1. COMMUNITY_DB_PATH
-    2. DATABASE_PATH (legacy fallback)
-    3. data/community.db
-    """
-    raw_path = (
-        os.environ.get('COMMUNITY_DB_PATH')
-        or os.environ.get('DATABASE_PATH')
-        or str(_DEFAULT_DB_PATH)
-    )
-
-    path = Path(raw_path).expanduser()
-    if not path.is_absolute():
-        path = (Path(__file__).resolve().parent / path).resolve()
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    return path
 
 
 def _get_db():
     """Open (or create) the SQLite community DB and ensure tables exist."""
-    db_path = _resolve_community_db_path()
-    conn = sqlite3.connect(
-        str(db_path),
-        check_same_thread=False,
-        timeout=30,
-    )
+    os.makedirs(os.path.dirname(_DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(_DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA busy_timeout = 30000")
-    conn.execute("PRAGMA journal_mode = WAL")
-    conn.execute("PRAGMA synchronous = NORMAL")
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ratings (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,7 +159,7 @@ def _cells_from_str(s):
     import cells_from_battery_string directly from analyzer.units."""
     if not is_valid_battery_string(s):
         return None
-    return cells_from_battery_string(s, default=4, lo=1, hi=12)
+    return cells_from_battery_string(s, default=4, lo=1, hi=8)
 
 # ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
 _HASH_CACHE: dict = {}
@@ -251,10 +221,10 @@ def validate_input(size, weight, prop_size, pitch, blades, battery,
         warnings.append("จำนวนใบพัด (blades) ต้องเป็นจำนวนเต็ม")
     try:
         cells = _cells_from_str(battery)
-        if cells is None or cells < 1 or cells > 12:
-            warnings.append("แบตควรอยู่ในช่วง 1S ถึง 12S")
+        if cells is None or cells < 1 or cells > 8:
+            warnings.append("แบตควรอยู่ในช่วง 1S ถึง 8S")
     except Exception:
-        warnings.append("แบตรูปแบบผิด (เช่น 3S, 4S, 6S, 8S, 10S, 12S)")
+        warnings.append("แบตรูปแบบผิด (เช่น 3S, 4S, 6S, 8S)")
 
     # FIX: these five fields used to have ZERO validation — a negative or
     # absurd motor_kv/motor_count/battery_mAh/payload_g/esc_current_limit_a
@@ -907,7 +877,7 @@ except Exception as _bb_err:
 def _cleanup_osd_files(max_age_hours: int = 24) -> None:
     """ลบไฟล์ OSD เก่ากว่า max_age_hours ออกจาก static/downloads/osd/
     เรียกก่อน save ทุกครั้งเพื่อป้องกัน disk fill"""
-    osd_dir = os.path.join(os.path.dirname(__file__), 'static', 'downloads', 'osd')
+    osd_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
     if not os.path.isdir(osd_dir):
         return
     cutoff = time.time() - max_age_hours * 3600
@@ -940,7 +910,3 @@ def _generate_cli_from_model(model):
         lines.append(f"// command: osd_add {it.get('type')} {it.get('x')} {it.get('y')} \"{it.get('label')}\" size={it.get('size')}")
     return "\n".join(lines)
 
-
-# ── BASE_URL & Sitemap Cache (Shared state) ──────────────────────────────────
-_BASE_URL = os.environ.get("BASE_URL", "https://configdoctor.onrender.com").rstrip("/")
-_SITEMAP_CACHE: dict = {}

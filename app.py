@@ -16,6 +16,8 @@ except ImportError:
 
 from flask import (Flask, render_template, request, send_from_directory,
                    abort, send_file, jsonify, url_for)
+from flask import (Flask, render_template, request, send_from_directory,
+                   abort, send_file, jsonify, url_for)
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os, time, logging, hashlib
 from datetime import datetime
@@ -66,28 +68,17 @@ except ImportError:
     logging.warning("flask_compress not installed — response compression disabled")
 
 # ── Rate Limiting ─────────────────────────────────────────────────────────
-from extensions import LIMITER_AVAILABLE, limiter, _rate
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    LIMITER_AVAILABLE = True
+except ImportError:
+    LIMITER_AVAILABLE = False
+    logging.warning("flask_limiter not installed — rate limiting disabled")
 
 
 # ── Flask app ─────────────────────────────────────────────────────────────
 app = Flask(__name__)
-def _startup_validate_templates() -> None:
-    """Validate that the main landing template exists before serving.
-    This keeps production startup honest, while still allowing local
-    development to run with a clear error if the template tree is broken.
-    """
-    try:
-        from jinja2 import Environment, FileSystemLoader as _FL
-        # ใช้ app.root_path เพื่อให้แน่ใจว่า path ถูกต้องทั้งบน local และ production
-        template_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "templates")
-        _env = Environment(loader=_FL(template_dir))
-        _env.get_template("index.html")
-        logging.info("Startup: template validation passed ✓")
-    except Exception as _te:
-        logging.error("Startup: template validation FAILED - %s", _te)
-        raise
-# รันทันทีเพื่อให้ gunicorn fail fast ถ้า template หาย
-_startup_validate_templates()
 
 # FIX (critical): templates/index.html uses a |md5 filter to build a
 # cosmetic "build fingerprint" hash for display. It was never registered,
@@ -121,7 +112,7 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB global upload limit
 # ── SHA-256 hash cache (avoid recomputing on every /downloads request) ────
 
 # ── sitemap.xml daily cache (was referenced but never declared — caused a 500) ──
-from core import _SITEMAP_CACHE, _BASE_URL
+_SITEMAP_CACHE: dict = {}
 
 # ── App start timestamp — ใช้ทำ ETag ให้ lightweight (เปลี่ยนทุก redeploy) ──
 _APP_START_TIME: str = str(int(time.time()))
@@ -144,6 +135,9 @@ if CSRF_AVAILABLE:
 # SECURITY PATCH: SESSION_COOKIE_SECURE=True by default; set FORCE_INSECURE=1 only for local HTTP dev
 FORCE_INSECURE = os.environ.get("FORCE_INSECURE", "0") in ("1", "true", "True")
 
+# ── BASE_URL: single source of truth for all absolute URL generation ──
+_BASE_URL = os.environ.get("BASE_URL", "https://configdoctor.onrender.com").rstrip("/")
+
 
 @app.context_processor
 def inject_base_url():
@@ -159,9 +153,23 @@ app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', '0') in ('1', 'true', 'True'
 
 # ── Init Rate Limiter ─────────────────────────────────────────────────────
 if LIMITER_AVAILABLE:
-    limiter.init_app(app)
+    # Use Redis if REDIS_URL is set in env (Render Redis add-on), else fall back to in-memory
     storage_uri = os.getenv("REDIS_URL", "memory://")
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        default_limits=[],          # No blanket limit — apply per-route only
+        storage_uri=storage_uri,
+    )
     logger.info("Rate limiter storage: %s", "redis" if storage_uri != "memory://" else "memory")
+    def _rate(limit_str):
+        """Decorator shortcut สำหรับ rate limit"""
+        return limiter.limit(limit_str)
+else:
+    # Fallback no-op decorator เมื่อ flask_limiter ไม่ถูก install
+    def _rate(limit_str):
+        def decorator(f): return f
+        return decorator
 
 @app.template_filter('timestamp_to_datetime')
 def timestamp_to_datetime_filter(ts):
@@ -278,10 +286,14 @@ app.register_blueprint(_tools_cli_api_bp)
 app.register_blueprint(_tools_osd_bp)
 
 
-# _startup_validate_templates moved to app creation section
-
-
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "10000"))
-    debug = os.environ.get("FLASK_DEBUG", "0") in ("1", "true", "True")
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    # ส่วนการตรวจสอบ Template ทำงานปกติได้
+    try:
+        from jinja2 import Environment, FileSystemLoader as _FL
+        _env = Environment(loader=_FL("templates"))
+        _env.get_template("index.html")
+        logger.info("Startup: template validation passed ✓")
+    except Exception as _te:
+        logger.error("Startup: template validation FAILED - %s", _te)
+
+# ลบชุดคำสั่ง app.run() ด้านล่างทิ้งไปเลยให้เหลือแค่นี้พอค่ะ คลีนที่สุดสำหรับ Vercel
