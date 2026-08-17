@@ -7,8 +7,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 
-from extensions import _rate, logger
-from core import cli_analyze_dump, analyze_blackbox_csv
+from app import logger, _rate, cli_analyze_dump, analyze_blackbox_csv
 
 bp = Blueprint('tools_cli_api', __name__)
 

@@ -7,7 +7,8 @@
 from datetime import datetime
 
 from flask import Blueprint, jsonify, Response
-from core import _BASE_URL, _SITEMAP_CACHE
+
+from app import _BASE_URL, _SITEMAP_CACHE
 
 bp = Blueprint('meta', __name__)
 
@@ -86,7 +87,6 @@ def sitemap_xml():
             ("/about",            "monthly", "0.5"),
             ("/changelog",        "weekly",  "0.5"),
             ("/military-uas",     "weekly",  "0.8"),
-            ("/fpv-gear",         "weekly",  "0.7"),
         ]
         base = _BASE_URL
         urls = "\n".join(

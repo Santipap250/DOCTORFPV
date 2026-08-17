@@ -9,7 +9,8 @@ import json
 import re
 
 from flask import Blueprint, render_template, jsonify
-from core import get_all_symptoms, _get_symptom_advice
+
+from app import get_all_symptoms, _get_symptom_advice
 
 bp = Blueprint('tools_advisor', __name__)
 

@@ -7,36 +7,16 @@ import os
 
 from flask import Blueprint, abort, send_from_directory, render_template
 from werkzeug.utils import secure_filename
-from core import _file_sha256
+
+from app import app, _file_sha256
 
 bp = Blueprint('downloads', __name__)
 
 
 @bp.route('/downloads/<fc>/<filename>')
 def download_diff(fc, filename):
-    from app import app
     safe_fc = secure_filename(fc)
-    # ROBUST VALIDATION:
-    # 1. Block null bytes and control characters
-    if '\0' in filename or any(ord(c) < 32 for c in filename):
-        abort(404)
-
-    # 2. Strict Whitelist: Allow alphanumeric, spaces, dots, dashes, underscores, 
-    # parentheses, and Thai characters (\u0e00-\u0e7f).
-    import re
-    if not re.match(r'^[a-zA-Z0-9\s\.\-_()\u0e00-\u0e7f]+$', filename):
-        abort(404)
-
-    # 3. Directory Traversal Block: Absolute check for any traversal patterns
-    # even though regex should catch most, we explicitly block these.
-    forbidden = ['..', '/', '\\', '%2e%2e', '%2f', '%5c']
-    if any(p in filename.lower() for p in forbidden):
-        abort(404)
-    
-    # 4. Final safety: use normalized filename
-    safe_fn = os.path.normpath(filename)
-    if safe_fn.startswith(('.', '/')):
-        abort(404)
+    safe_fn = secure_filename(filename)
     base_root = os.path.realpath(os.path.join(app.root_path, 'static', 'downloads', 'diff_all'))
     if not safe_fc:
         abort(404)
@@ -53,7 +33,6 @@ def download_diff(fc, filename):
 
 @bp.route('/downloads')
 def downloads_index():
-    from app import app
     base = os.path.realpath(os.path.join(app.root_path, 'static', 'downloads', 'diff_all'))
     items = []
     if os.path.isdir(base):
