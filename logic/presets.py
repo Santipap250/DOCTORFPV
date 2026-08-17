@@ -124,7 +124,7 @@ _MAX_SCALE_STEPS = 4  # don't extrapolate more than ±4 cells beyond the referen
 def _cells_from_str(s):
     """Deprecated local shim — kept so any external import doesn't break.
     Use analyzer.units.cells_from_battery_string directly in new code."""
-    return cells_from_battery_string(s, default=4, lo=1, hi=12)
+    return cells_from_battery_string(s, default=4, lo=1, hi=8)
 
 
 def _battery_pid_scale(bkey: str, cells: int) -> Dict[str, float]:
