@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}ConfigDoctor — วิเคราะห์โดรน FPV ของคุณ{% endblock %}
-{% block page_og_title %}ConfigDoctor — วิเคราะห์โดรน FPV ของคุณ{% endblock %}
-{% block page_og_description %}เริ่มจากปัญหาที่คุณเจอ แล้วเลือกเครื่องมือ FPV ที่เหมาะที่สุดสำหรับการวิเคราะห์ ปรับจูน และตรวจสอบโดรนของคุณ{% endblock %}
+{% block title %}ConfigDoctor — FPV Drone Diagnostic Command Center{% endblock %}
+{% block page_og_title %}ConfigDoctor — FPV Drone Diagnostic Platform{% endblock %}
+{% block page_og_description %}วิเคราะห์โดรน FPV, PID, Filter, Blackbox, Motor, Battery และเครื่องมือ tuning ในศูนย์เดียว{% endblock %}
 {% block page_og_path %}/landing{% endblock %}
 {% block page_nav_page %}landing{% endblock %}
 {% block page_css %}landing.css{% endblock %}
@@ -11,347 +11,352 @@
 {% block extra_head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Sarabun:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<meta name="theme-color" content="#050709">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Sarabun:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#05080a">
 {% endblock %}
 
 {% block content %}
-<div class="lp-shell">
-  <header class="lp-topbar" id="topbar">
-    <div class="lp-wrap lp-topbar__inner">
-      <a class="lp-brand" href="/landing" aria-label="ConfigDoctor Home">
-        <img src="{{ url_for('static', filename='img/configdoctor-landing-logo.png') }}" alt="ConfigDoctor" class="lp-brand__mark" width="48" height="48">
-        <span class="lp-brand__copy">
+<div class="cd-page" id="configDoctorLanding">
+  <div class="cd-bg-grid" aria-hidden="true"></div>
+  <div class="cd-bg-glow cd-bg-glow--one" aria-hidden="true"></div>
+  <div class="cd-bg-glow cd-bg-glow--two" aria-hidden="true"></div>
+
+  <header class="cd-nav" id="topbar">
+    <div class="cd-container cd-nav__inner">
+      <a class="cd-brand" href="/landing" aria-label="ConfigDoctor Home">
+        <img src="{{ url_for('static', filename='img/configdoctor-landing-logo.png') }}" alt="ConfigDoctor" width="44" height="44" fetchpriority="high">
+        <span class="cd-brand__text">
           <strong>ConfigDoctor</strong>
-          <span>FPV DRONE DIAGNOSTIC PLATFORM</span>
+          <small>FPV DIAGNOSTIC PLATFORM</small>
         </span>
       </a>
 
-      <nav class="lp-desktop-nav" aria-label="Primary navigation">
+      <nav class="cd-nav__links" aria-label="Main navigation">
         <a href="#start">Start</a>
+        <a href="#analyzer">Analyzer</a>
         <a href="#tools">Tools</a>
         <a href="#community">Community</a>
         <a href="#support">Support</a>
-        <a href="/about">About</a>
       </nav>
 
-      <div class="lp-topbar__actions">
-        <a class="lp-btn lp-btn--ghost lp-hide-mobile" href="/app">Launch App</a>
-        <button type="button" class="lp-menu-btn js-launcher-open" aria-label="Open tool launcher" aria-expanded="false" aria-controls="toolLauncher">
+      <div class="cd-nav__actions">
+        <a class="cd-btn cd-btn--ghost cd-hide-mobile" href="/app">Launch App <span>↗</span></a>
+        <button class="cd-icon-btn cd-menu-btn" type="button" aria-label="Open tool launcher" aria-expanded="false" aria-controls="toolLauncher">
           <span></span><span></span><span></span>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="lp-main">
-    <section class="lp-hero" id="start">
-      <div class="lp-wrap lp-hero__grid">
-        <div class="lp-hero__copy">
-          <span class="lp-pill"><i></i> FPV DRONE DIAGNOSTIC PLATFORM</span>
-          <h1>
-            <span class="lp-hero__line">วิเคราะห์โดรน</span>
-            <span class="lp-hero__accent">FPV</span>
-            <span class="lp-hero__line">ของคุณให้ชัดขึ้น</span>
-          </h1>
-          <p class="lp-hero__desc">
-            เริ่มจากปัญหาที่คุณเจอ แล้วให้ ConfigDoctor ช่วยพาไปยังเครื่องมือที่เหมาะที่สุด — ตั้งแต่ Blackbox, PID, Filter, Motor ไปจนถึง Battery และ RPM Filter
-          </p>
+  <main>
+    <section class="cd-hero cd-section" id="start">
+      <div class="cd-container cd-hero__layout">
+        <div class="cd-hero__copy cd-reveal">
+          <div class="cd-status-pill"><span class="cd-status-dot"></span><span>FPV DRONE DIAGNOSTIC SYSTEM</span></div>
+          <div class="cd-kicker">CONFIG · TUNE · DIAGNOSE · FLY</div>
+          <h1>วิเคราะห์โดรน FPV<br><em>ก่อน</em> ลงมือแก้</h1>
+          <p class="cd-hero__lead">จาก Configuration, Blackbox และสเปกบิลด์ ไปจนถึง PID, Filter, Motor, Battery และ RPM — ConfigDoctor ช่วยจัดปัญหาให้เป็นขั้นตอนที่ลงมือทำได้จริง</p>
 
-          <div class="lp-hero__actions">
-            <a class="lp-btn lp-btn--primary" href="/app">
-              <span>เริ่มวิเคราะห์</span>
-              <span aria-hidden="true">→</span>
-            </a>
-            <button type="button" class="lp-btn lp-btn--secondary js-launcher-open">ดูเครื่องมือทั้งหมด</button>
+          <div class="cd-hero__actions">
+            <a class="cd-btn cd-btn--primary" href="/app">ANALYZE MY DRONE <span>→</span></a>
+            <button class="cd-btn cd-btn--secondary js-launcher-open" type="button">EXPLORE TOOLS <span>⌘</span></button>
           </div>
 
-          <div class="lp-trust-row" aria-label="Key benefits">
-            <div class="lp-trust-item">
-              <strong>Mobile-first</strong>
-              <span>ใช้งานง่ายบนมือถือ</span>
-            </div>
-            <div class="lp-trust-item">
-              <strong>No sign-up</strong>
-              <span>เริ่มใช้งานได้ทันที</span>
-            </div>
-            <div class="lp-trust-item">
-              <strong>FPV-focused</strong>
-              <span>ออกแบบเพื่อโดรน FPV</span>
-            </div>
+          <div class="cd-proof-row" aria-label="Platform highlights">
+            <div><span class="cd-proof-icon">01</span><strong>Mobile-first</strong><small>ใช้งานจริงบนมือถือ</small></div>
+            <div><span class="cd-proof-icon cd-proof-icon--cyan">02</span><strong>No sign-up</strong><small>เปิดแล้วเริ่มได้ทันที</small></div>
+            <div><span class="cd-proof-icon cd-proof-icon--amber">03</span><strong>FPV-focused</strong><small>เครื่องมือเฉพาะทาง</small></div>
           </div>
         </div>
 
-        <div class="lp-hero__visual" aria-hidden="true">
-          <div class="lp-hero-card">
-            <div class="lp-hero-card__glow"></div>
-            <img src="{{ url_for('static', filename='img/hero-drone.webp') }}" alt="" class="lp-hero-card__drone" width="980" height="980" fetchpriority="high">
-            <div class="lp-hero-card__badge">LIVE ANALYSIS</div>
-            <div class="lp-hero-card__panel lp-panel-score">
-              <span class="lp-panel-score__label">CONFIG HEALTH</span>
-              <strong>87<span>/100</span></strong>
-            </div>
-            <div class="lp-hero-card__panel lp-panel-signal">
-              <span>Signal</span>
-              <strong>98%</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+        <div class="cd-hero__visual cd-reveal cd-reveal--delay" aria-label="Diagnostic dashboard preview">
+          <div class="cd-hero-stage">
+            <div class="cd-stage-corner cd-stage-corner--tl"></div>
+            <div class="cd-stage-corner cd-stage-corner--tr"></div>
+            <div class="cd-stage-corner cd-stage-corner--bl"></div>
+            <div class="cd-stage-corner cd-stage-corner--br"></div>
 
-    <section class="lp-section lp-section--quick" aria-labelledby="quick-start-title">
-      <div class="lp-wrap">
-        <div class="lp-section__head">
-          <div>
-            <span class="lp-section__eyebrow">QUICK START</span>
-            <h2 id="quick-start-title">คุณกำลังทำอะไรกับโดรนของคุณ?</h2>
-          </div>
-          <p>เลือกเส้นทางเริ่มต้นที่ตรงกับสิ่งที่คุณต้องการทำ แล้วค่อยลงลึกในเครื่องมือที่เหมาะที่สุด</p>
-        </div>
+            <div class="cd-radar-ring cd-radar-ring--outer"></div>
+            <div class="cd-radar-ring cd-radar-ring--inner"></div>
+            <div class="cd-radar-sweep"></div>
+            <div class="cd-crosshair cd-crosshair--x"></div>
+            <div class="cd-crosshair cd-crosshair--y"></div>
 
-        <div class="lp-path-grid">
-          <a class="lp-path-card" href="/app">
-            <span class="lp-path-card__icon">◎</span>
-            <strong>Analyze</strong>
-            <p>ตรวจสอบโดรน หาจุดผิดปกติ และดูว่าควรเริ่มแก้อะไรก่อน</p>
-            <span class="lp-path-card__meta">Configuration · Blackbox · PID</span>
-          </a>
-          <a class="lp-path-card lp-path-card--cyan" href="/pid-advisor">
-            <span class="lp-path-card__icon">◌</span>
-            <strong>Tune</strong>
-            <p>ปรับ PID, Filter, Rates และส่วนที่ส่งผลต่อความนิ่งของลำ</p>
-            <span class="lp-path-card__meta">PID · Filter · Rates · RPM</span>
-          </a>
-          <a class="lp-path-card lp-path-card--amber" href="/bf-wizard">
-            <span class="lp-path-card__icon">◈</span>
-            <strong>Build</strong>
-            <p>ช่วยตรวจบิลด์ อุปกรณ์ และข้อมูลที่ต้องใช้ก่อนบินจริง</p>
-            <span class="lp-path-card__meta">Wizard · Build Card · Log</span>
-          </a>
-        </div>
-      </div>
-    </section>
+            <div class="cd-readout cd-readout--top-left"><span>LIVE DIAGNOSTIC</span><strong>ONLINE</strong></div>
+            <div class="cd-readout cd-readout--top-right"><span>PROFILE</span><strong>5" FREESTYLE</strong></div>
 
-    <section class="lp-section lp-section--featured" aria-labelledby="featured-title">
-      <div class="lp-wrap lp-featured">
-        <div class="lp-featured__content">
-          <span class="lp-section__eyebrow">RECOMMENDED START</span>
-          <h2 id="featured-title">Drone Analyzer</h2>
-          <p>
-            จุดเริ่มต้นที่แนะนำสำหรับผู้ใช้ใหม่และผู้ที่ต้องการเช็กสุขภาพโดรนแบบเร็ว วิเคราะห์ PID, Filter, Motor และ Flight Performance ในที่เดียว
-          </p>
-          <ul class="lp-checklist">
-            <li>ดูภาพรวมก่อนลงมือปรับค่า</li>
-            <li>อ่านผลลัพธ์เป็นขั้นตอนที่เข้าใจง่าย</li>
-            <li>เชื่อมต่อกับเครื่องมืออื่นได้ต่อเนื่อง</li>
-          </ul>
-          <div class="lp-featured__actions">
-            <a class="lp-btn lp-btn--primary" href="/app">เริ่มวิเคราะห์</a>
-            <a class="lp-btn lp-btn--ghost" href="#tools">ดูเครื่องมือแนะนำ</a>
-          </div>
-        </div>
-
-        <div class="lp-featured__panel" aria-label="Drone health overview">
-          <div class="lp-mini-report">
-            <div class="lp-mini-report__head">
-              <span>DRONE HEALTH OVERVIEW</span>
-              <span class="lp-chip lp-chip--success">ANALYSIS READY</span>
+            <div class="cd-drone-wrap">
+              <div class="cd-drone-aura"></div>
+              <img src="{{ url_for('static', filename='img/hero-drone.webp') }}" alt="" class="cd-drone" width="980" height="980" fetchpriority="high">
+              <div class="cd-scanline"></div>
             </div>
-            <div class="lp-score-ring">
-              <div>
-                <strong>87</strong>
-                <span>/100</span>
-              </div>
+
+            <div class="cd-hud-card cd-hud-card--score">
+              <div class="cd-hud-card__label">CONFIG HEALTH</div>
+              <div class="cd-score"><strong>87</strong><span>/100</span></div>
+              <div class="cd-score-track"><span style="width:87%"></span></div>
             </div>
-            <div class="lp-mini-stats">
+
+            <div class="cd-hud-card cd-hud-card--signal">
+              <span>SIGNAL</span><strong>98%</strong><i></i>
+            </div>
+
+            <div class="cd-hud-metrics">
               <div><span>PID</span><strong>GOOD</strong></div>
-              <div><span>FILTER</span><strong>CHECK</strong></div>
+              <div><span>FILTER</span><strong class="is-warn">REVIEW</strong></div>
               <div><span>MOTOR</span><strong>GOOD</strong></div>
               <div><span>BATTERY</span><strong>HEALTHY</strong></div>
             </div>
+
+            <div class="cd-telemetry-bar">
+              <span>FC <b>READY</b></span><span>RPM <b>SYNC</b></span><span>BB <b>READY</b></span><span>VTX <b>ONLINE</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cd-container cd-hero__bottom">
+        <div class="cd-scroll-hint"><span></span> SCROLL TO DIAGNOSE</div>
+        <div class="cd-live-line"><span>PLATFORM STATUS</span><b>ALL CORE TOOLS READY</b></div>
+      </div>
+    </section>
+
+    <section class="cd-section cd-start-section" aria-labelledby="startTitle">
+      <div class="cd-container">
+        <div class="cd-section-head cd-reveal">
+          <div><span class="cd-eyebrow">QUICK START</span><h2 id="startTitle">คุณกำลังแก้อะไรอยู่?</h2></div>
+          <p>เริ่มจากอาการหรือเป้าหมายที่คุณเจอ แล้วเข้าสู่เครื่องมือที่ตรงที่สุด โดยไม่ต้องไล่หาทีละหน้า</p>
+        </div>
+
+        <div class="cd-path-grid">
+          <a class="cd-path-card cd-reveal" href="/app">
+            <span class="cd-path-no">01 / ANALYZE</span>
+            <span class="cd-path-icon">⌁</span>
+            <strong>DRONE HEALTH</strong>
+            <p>เช็กภาพรวม configuration, PID, Filter, Motor และ performance ก่อนลงมือแก้</p>
+            <span class="cd-path-link">START ANALYSIS <b>→</b></span>
+          </a>
+          <a class="cd-path-card cd-path-card--cyan cd-reveal" href="/pid-advisor">
+            <span class="cd-path-no">02 / TUNE</span>
+            <span class="cd-path-icon">◈</span>
+            <strong>TUNING</strong>
+            <p>เดินต่อจากอาการบินไปยัง PID, Rates, Filter, RPM และเครื่องมือปรับจูน</p>
+            <span class="cd-path-link">OPEN TUNING <b>→</b></span>
+          </a>
+          <a class="cd-path-card cd-path-card--amber cd-reveal" href="/bf-wizard">
+            <span class="cd-path-no">03 / BUILD</span>
+            <span class="cd-path-icon">▦</span>
+            <strong>BUILD & HARDWARE</strong>
+            <p>เช็กบิลด์ อุปกรณ์ แบตเตอรี่ VTX และข้อมูลที่ต้องใช้ก่อนขึ้นบินจริง</p>
+            <span class="cd-path-link">CHECK BUILD <b>→</b></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="cd-section cd-analyzer" id="analyzer" aria-labelledby="analyzerTitle">
+      <div class="cd-container">
+        <div class="cd-analyzer-shell">
+          <div class="cd-analyzer-copy cd-reveal">
+            <span class="cd-eyebrow">RECOMMENDED FIRST STEP</span>
+            <div class="cd-analyzer-tag"><span></span> DIAGNOSTIC ENGINE</div>
+            <h2 id="analyzerTitle">Drone<br><em>Analyzer</em></h2>
+            <p>จุดเริ่มต้นสำหรับคนที่ยังไม่รู้ว่าจะเริ่มแก้ตรงไหน หรืออยากเห็นภาพรวมของโดรนก่อนลงลึกในค่าจูน</p>
+
+            <div class="cd-check-grid">
+              <span>CONFIGURATION</span><span>PID</span><span>FILTER</span><span>MOTOR</span><span>BATTERY</span><span>PERFORMANCE</span>
+            </div>
+
+            <div class="cd-analyzer-actions">
+              <a class="cd-btn cd-btn--primary" href="/app">START FULL ANALYSIS <span>→</span></a>
+              <a class="cd-text-link" href="#tools">ดูเครื่องมือทั้งหมด <span>↓</span></a>
+            </div>
+          </div>
+
+          <div class="cd-diagnostic-ui cd-reveal cd-reveal--delay">
+            <div class="cd-diagnostic-ui__top"><span>DRONE HEALTH / OVERVIEW</span><b><i></i> ANALYSIS READY</b></div>
+            <div class="cd-diagnostic-ui__body">
+              <div class="cd-score-orbit">
+                <div class="cd-score-orbit__ring"></div>
+                <div class="cd-score-orbit__dot"></div>
+                <div class="cd-score-orbit__value"><strong>87</strong><span>HEALTH SCORE</span></div>
+              </div>
+              <div class="cd-diag-list">
+                <div><span>PID</span><b>GOOD</b><i class="cd-meter"><em style="width:92%"></em></i></div>
+                <div><span>FILTER</span><b class="is-warn">REVIEW</b><i class="cd-meter cd-meter--warn"><em style="width:72%"></em></i></div>
+                <div><span>MOTOR</span><b>GOOD</b><i class="cd-meter"><em style="width:95%"></em></i></div>
+                <div><span>BATTERY</span><b>HEALTHY</b><i class="cd-meter"><em style="width:88%"></em></i></div>
+                <div><span>PERFORMANCE</span><b>READY</b><i class="cd-meter"><em style="width:84%"></em></i></div>
+              </div>
+            </div>
+            <div class="cd-diagnostic-ui__footer"><span>PRE-FLIGHT CHECK</span><strong>04 / 05 PASS</strong><span class="cd-footer-line"></span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="lp-section lp-section--tools" id="tools" aria-labelledby="tools-title">
-      <div class="lp-wrap">
-        <div class="lp-section__head">
-          <div>
-            <span class="lp-section__eyebrow">TOP TOOLS</span>
-            <h2 id="tools-title">เครื่องมือที่ควรเริ่มก่อน</h2>
-          </div>
-          <p>ชุดเครื่องมือเริ่มต้นที่ช่วยตอบคำถามสำคัญที่สุดของนักบิน FPV ก่อนจะลงรายละเอียดใน Launcher</p>
+    <section class="cd-section cd-flow" aria-labelledby="flowTitle">
+      <div class="cd-container">
+        <div class="cd-section-head cd-section-head--center cd-reveal">
+          <span class="cd-eyebrow">DIAGNOSTIC FLOW</span>
+          <h2 id="flowTitle">จากข้อมูล สู่คำแนะนำที่บินได้จริง</h2>
+          <p>ConfigDoctor เปลี่ยนข้อมูลที่กระจัดกระจายให้กลายเป็นลำดับการแก้ปัญหาที่อ่านง่าย</p>
         </div>
 
-        <div class="lp-tool-grid">
-          <a class="lp-tool-card lp-tool-card--green" href="/pid-advisor">
-            <span class="lp-tool-card__icon">≡</span>
-            <strong>PID Advisor</strong>
-            <p>แนะนำ PID ที่เหมาะกับสไตล์การบินของคุณ</p>
-          </a>
-          <a class="lp-tool-card lp-tool-card--cyan" href="/blackbox">
-            <span class="lp-tool-card__icon">∿</span>
-            <strong>Blackbox</strong>
-            <p>วิเคราะห์ log เพื่อหาปัญหาและปรับปรุงต่อ</p>
-          </a>
-          <a class="lp-tool-card lp-tool-card--green" href="/motor-prop">
-            <span class="lp-tool-card__icon">✦</span>
-            <strong>Motor×Prop</strong>
-            <p>จับคู่มอเตอร์และใบพัดให้เหมาะกับบิลด์</p>
-          </a>
-          <a class="lp-tool-card lp-tool-card--cyan" href="/vtx">
-            <span class="lp-tool-card__icon">⌁</span>
-            <strong>VTX Bands</strong>
-            <p>ดูย่านความถี่และช่องสัญญาณที่ใช้ได้</p>
-          </a>
-          <a class="lp-tool-card lp-tool-card--green" href="/battery-health">
-            <span class="lp-tool-card__icon">◍</span>
-            <strong>Battery Health</strong>
-            <p>ตรวจสุขภาพแบตเตอรี่และความปลอดภัย</p>
-          </a>
-          <a class="lp-tool-card lp-tool-card--amber" href="/rpm-filter">
-            <span class="lp-tool-card__icon">⟳</span>
-            <strong>RPM Filter</strong>
-            <p>ตั้งค่าและปรับแต่ง RPM Filter ให้เหมาะ</p>
-          </a>
-        </div>
-
-        <div class="lp-section__cta-row">
-          <button type="button" class="lp-btn lp-btn--secondary js-launcher-open">ดูเครื่องมือทั้งหมด</button>
+        <div class="cd-flowline">
+          <div class="cd-flow-step cd-reveal"><span>01</span><div><strong>INPUT</strong><small>Config / Log / Specs</small></div></div>
+          <div class="cd-flow-connector" aria-hidden="true"></div>
+          <div class="cd-flow-step cd-reveal"><span>02</span><div><strong>ANALYZE</strong><small>Find the signal</small></div></div>
+          <div class="cd-flow-connector" aria-hidden="true"></div>
+          <div class="cd-flow-step cd-reveal"><span>03</span><div><strong>DIAGNOSE</strong><small>Prioritize issues</small></div></div>
+          <div class="cd-flow-connector" aria-hidden="true"></div>
+          <div class="cd-flow-step cd-reveal"><span>04</span><div><strong>IMPROVE</strong><small>Apply the fix</small></div></div>
+          <div class="cd-flow-connector" aria-hidden="true"></div>
+          <div class="cd-flow-step cd-reveal"><span>05</span><div><strong>FLY</strong><small>Test & iterate</small></div></div>
         </div>
       </div>
     </section>
 
-    <section class="lp-section lp-section--steps" aria-labelledby="how-title">
-      <div class="lp-wrap">
-        <div class="lp-section__head">
-          <div>
-            <span class="lp-section__eyebrow">HOW IT WORKS</span>
-            <h2 id="how-title">จากข้อมูล สู่คำแนะนำที่ใช้งานได้จริง</h2>
-          </div>
-          <p>ลำดับการใช้งานควรถูกออกแบบให้สั้น ชัด และเข้าใจง่ายตั้งแต่ครั้งแรก</p>
+    <section class="cd-section cd-tools" id="tools" aria-labelledby="toolsTitle">
+      <div class="cd-container">
+        <div class="cd-section-head cd-reveal">
+          <div><span class="cd-eyebrow">TOOL ECOSYSTEM</span><h2 id="toolsTitle">ทุกอย่างที่ต้องใช้<br>ในศูนย์เดียว</h2></div>
+          <p>จาก analyzer ถึง tuning และ hardware — เปิดเครื่องมือที่ใช่จาก launcher ได้ในไม่กี่แตะ</p>
         </div>
 
-        <div class="lp-step-grid">
-          <article class="lp-step-card">
-            <span class="lp-step-card__num">01</span>
-            <h3>Input</h3>
-            <p>ใส่ข้อมูลของโดรน เช่น Configuration, Blackbox หรือสเปกที่มีอยู่</p>
-          </article>
-          <article class="lp-step-card">
-            <span class="lp-step-card__num">02</span>
-            <h3>Analyze</h3>
-            <p>ระบบช่วยตรวจสอบข้อมูลสำคัญและชี้จุดที่ควรให้ความสนใจ</p>
-          </article>
-          <article class="lp-step-card">
-            <span class="lp-step-card__num">03</span>
-            <h3>Improve</h3>
-            <p>รับแนวทางที่อ่านง่ายและนำไปปรับใช้กับโดรนของคุณได้ทันที</p>
-          </article>
+        <div class="cd-tool-showcase">
+          <div class="cd-tool-feature cd-reveal">
+            <div class="cd-tool-feature__head"><span>01</span><small>ANALYZE</small></div>
+            <div class="cd-tool-feature__icon cd-tool-feature__icon--green">⌬</div>
+            <h3>ANALYZE</h3>
+            <p>Drone Analyzer, Blackbox, CLI Surgeon และ Comparator สำหรับการหาสาเหตุจากข้อมูลจริง</p>
+            <div class="cd-tool-list"><a href="/app">Drone Analyzer</a><a href="/blackbox">Blackbox</a><a href="/cli_surgeon">CLI Surgeon</a><a href="/cli-comparator">CLI Comparator</a></div>
+          </div>
+          <div class="cd-tool-feature cd-reveal cd-reveal--delay">
+            <div class="cd-tool-feature__head"><span>02</span><small>TUNE</small></div>
+            <div class="cd-tool-feature__icon cd-tool-feature__icon--cyan">◒</div>
+            <h3>TUNE</h3>
+            <p>เครื่องมือช่วยปรับ PID, Rates, Filter และ RPM เพื่อให้การจูนเป็นขั้นเป็นตอน</p>
+            <div class="cd-tool-list"><a href="/pid-advisor">PID Advisor</a><a href="/quick-tune">Quick Tune</a><a href="/rates-visualizer">Rates Visualizer</a><a href="/rpm-filter">RPM Filter</a></div>
+          </div>
+          <div class="cd-tool-feature cd-reveal cd-reveal--delay-2">
+            <div class="cd-tool-feature__head"><span>03</span><small>HARDWARE</small></div>
+            <div class="cd-tool-feature__icon cd-tool-feature__icon--amber">◇</div>
+            <h3>HARDWARE</h3>
+            <p>ตรวจ Motor×Prop, ESC, Battery, Thermal และ VTX ก่อนปัญหาจะกลายเป็นค่าเสียหาย</p>
+            <div class="cd-tool-list"><a href="/motor-prop">Motor×Prop</a><a href="/esc-checker">ESC Checker</a><a href="/battery-health">Battery Health</a><a href="/vtx">VTX Bands</a></div>
+          </div>
+        </div>
+
+        <div class="cd-tools-cta cd-reveal">
+          <div><span class="cd-eyebrow">29+ TOOLS</span><strong>เปิด Tool Launcher แล้วค้นหาตามสิ่งที่ต้องการ</strong></div>
+          <button class="cd-btn cd-btn--secondary js-launcher-open" type="button">OPEN TOOL LAUNCHER <span>↗</span></button>
         </div>
       </div>
     </section>
 
-    <section class="lp-section lp-section--community" id="community" aria-labelledby="community-title">
-      <div class="lp-wrap lp-community">
-        <div class="lp-community__copy">
-          <span class="lp-section__eyebrow">BUILT BY PILOTS</span>
-          <h2 id="community-title">สร้างโดยคนที่บินจริง เพื่อคนที่บินจริง</h2>
-          <p>
-            ConfigDoctor เกิดจากความตั้งใจทำให้การวิเคราะห์และการจูนโดรน FPV เข้าใจง่ายขึ้น พร้อมเปิดทางให้ผู้ใช้เริ่มจากจุดที่ถูกต้องที่สุด
-          </p>
-          <div class="lp-community__actions">
-            <a class="lp-btn lp-btn--primary" href="/about">รู้จักโปรเจกต์</a>
-            <a class="lp-btn lp-btn--ghost" href="/team">ดูทีมงาน</a>
-          </div>
+    <section class="cd-section cd-classes" aria-labelledby="classesTitle">
+      <div class="cd-container">
+        <div class="cd-section-head cd-reveal">
+          <div><span class="cd-eyebrow">FPV CLASS RANGE</span><h2 id="classesTitle">ตั้งแต่ 1" ถึง 8"+</h2></div>
+          <p>โครงสร้างเครื่องมือถูกออกแบบให้ใช้กับบิลด์หลายขนาดและหลายสไตล์การบิน</p>
         </div>
+        <div class="cd-class-strip">
+          {% for cls in ['1"','2"','3"','4"','5"','6"','7"','8"+'] %}
+          <div class="cd-class-card cd-reveal{% if cls == '5"' %} is-featured{% endif %}">
+            <span>{{ '%02d'|format(loop.index) }}</span>
+            <strong>{{ cls }}</strong>
+            {% if cls == '5"' %}<small>CORE FPV</small>{% else %}<small>FPV CLASS</small>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
 
-        <div class="lp-community__facts">
-          <div class="lp-fact-card">
-            <strong>Mobile-first</strong>
-            <span>โฟกัสการใช้งานบนมือถือและหน้าจอเล็ก</span>
+    <section class="cd-section cd-status-section" aria-labelledby="statusTitle">
+      <div class="cd-container">
+        <div class="cd-system-card cd-reveal">
+          <div class="cd-system-card__head">
+            <div><span class="cd-eyebrow">PLATFORM STATUS</span><h2 id="statusTitle">Core systems ready</h2></div>
+            <span class="cd-system-online"><i></i> OPERATIONAL</span>
           </div>
-          <div class="lp-fact-card">
-            <strong>Transparent</strong>
-            <span>มีหน้า About, Team และ Changelog ให้ตรวจสอบได้</span>
+          <div class="cd-system-grid">
+            <div><span>FLIGHT CONTROLLER</span><strong>ONLINE</strong><i></i></div>
+            <div><span>BLACKBOX</span><strong>READY</strong><i></i></div>
+            <div><span>RPM TELEMETRY</span><strong>READY</strong><i></i></div>
+            <div><span>MOTOR ANALYSIS</span><strong>READY</strong><i></i></div>
+            <div><span>BATTERY ANALYSIS</span><strong>READY</strong><i></i></div>
+            <div><span>VTX ANALYSIS</span><strong>READY</strong><i></i></div>
           </div>
-          <div class="lp-fact-card">
-            <strong>Free to use</strong>
-            <span>เริ่มสำรวจเครื่องมือและใช้งานได้ทันที</span>
+          <div class="cd-system-card__footer"><span>STATUS CHECK / CORE READY</span><span>ConfigDoctor core platform</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cd-section cd-community" id="community" aria-labelledby="communityTitle">
+      <div class="cd-container">
+        <div class="cd-community-shell">
+          <div class="cd-community-copy cd-reveal">
+            <span class="cd-eyebrow">BUILT BY PILOTS</span>
+            <h2 id="communityTitle">สร้างเพื่อคนที่<br><em>ลงสนามบินจริง</em></h2>
+            <p>ConfigDoctor เกิดจากความตั้งใจทำให้การวิเคราะห์และการจูนโดรน FPV เข้าถึงง่ายขึ้น โดยยังเก็บรายละเอียดที่นักบินจริงต้องใช้</p>
+            <div class="cd-community-actions"><a class="cd-btn cd-btn--primary" href="/about">ABOUT CONFIGDOCTOR <span>→</span></a><a class="cd-btn cd-btn--ghost" href="/team">MEET THE TEAM</a></div>
+          </div>
+          <div class="cd-community-facts cd-reveal cd-reveal--delay">
+            <div><strong>01</strong><span>Mobile-first</span><small>ออกแบบให้ใช้งานบนมือถือเป็นหลัก</small></div>
+            <div><strong>02</strong><span>Transparent</span><small>มี About, Team และ Changelog ให้ตรวจสอบ</small></div>
+            <div><strong>03</strong><span>Free to explore</span><small>เริ่มสำรวจเครื่องมือได้ทันที</small></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="lp-section lp-section--support" id="support" aria-labelledby="support-title">
-      <div class="lp-wrap lp-support">
-        <div class="lp-support__copy">
-          <span class="lp-section__eyebrow">SUPPORT</span>
-          <h2 id="support-title">ช่วยให้โปรเจกต์พัฒนาต่อ</h2>
-          <p>
-            ถ้า ConfigDoctor ช่วยคุณได้ คุณสามารถช่วยสนับสนุนค่าโฮสต์ การพัฒนา และเครื่องมือใหม่ ๆ ได้ตามความสมัครใจ
-          </p>
-          <a class="lp-btn lp-btn--primary" href="#support-qr">สนับสนุนโปรเจกต์</a>
-        </div>
-        <div class="lp-support__qr" id="support-qr">
-          <img src="{{ url_for('static', filename='img/configdoctor-support-qr.webp') }}" alt="QR code สำหรับสนับสนุนโปรเจกต์ ConfigDoctor" width="320" height="320" loading="lazy">
-          <p>สแกนด้วยแอปธนาคารที่รองรับ PromptPay</p>
+    <section class="cd-section cd-support" id="support" aria-labelledby="supportTitle">
+      <div class="cd-container">
+        <div class="cd-support-shell cd-reveal">
+          <div class="cd-support-copy">
+            <span class="cd-eyebrow">SUPPORT THE BUILD</span>
+            <h2 id="supportTitle">ช่วยให้เครื่องมือนี้<br>บินต่อไปได้</h2>
+            <p>ถ้า ConfigDoctor ช่วยคุณได้ คุณสามารถช่วยสนับสนุนค่าโฮสต์ การพัฒนา และเครื่องมือใหม่ ๆ ได้ตามความสมัครใจ</p>
+            <a class="cd-btn cd-btn--primary" href="#supportQR">SUPPORT CONFIGDOCTOR <span>↓</span></a>
+          </div>
+          <div class="cd-support-qr" id="supportQR">
+            <div class="cd-support-qr__frame"><img src="{{ url_for('static', filename='img/configdoctor-support-qr.webp') }}" alt="QR code สำหรับสนับสนุนโปรเจกต์ ConfigDoctor" width="320" height="320" loading="lazy"></div>
+            <span>สแกนด้วยแอปธนาคารที่รองรับ PromptPay</span>
+          </div>
         </div>
       </div>
     </section>
   </main>
+
+  <footer class="cd-footer">
+    <div class="cd-container cd-footer__inner">
+      <div><strong>CONFIGDOCTOR</strong><span>FPV DRONE DIAGNOSTIC PLATFORM</span></div>
+      <div class="cd-footer__links"><a href="/about">About</a><a href="/team">Team</a><a href="/changelog">Changelog</a><a href="/downloads">Downloads</a></div>
+    </div>
+  </footer>
 </div>
 
-<nav class="lp-bottom-nav" aria-label="Mobile navigation">
-  <a href="/landing" class="lp-bottom-nav__item is-active" aria-current="page">
-    <span class="lp-bottom-nav__icon">⌂</span>
-    <span>Home</span>
-  </a>
-  <button type="button" class="lp-bottom-nav__item js-launcher-open">
-    <span class="lp-bottom-nav__icon">◫</span>
-    <span>Tools</span>
-  </button>
-  <a href="/tuning-log" class="lp-bottom-nav__item">
-    <span class="lp-bottom-nav__icon">▣</span>
-    <span>Log</span>
-  </a>
-  <a href="/about" class="lp-bottom-nav__item">
-    <span class="lp-bottom-nav__icon">◐</span>
-    <span>About</span>
-  </a>
+<nav class="cd-mobile-nav" aria-label="Mobile navigation">
+  <a href="/landing" class="is-active" aria-current="page"><span>⌂</span><small>Home</small></a>
+  <a href="/app"><span>⌁</span><small>Analyze</small></a>
+  <button type="button" class="js-launcher-open"><span>◈</span><small>Tools</small></button>
+  <a href="/tuning-log"><span>▣</span><small>Log</small></a>
+  <a href="/about"><span>◐</span><small>More</small></a>
 </nav>
 
-<div class="lp-launcher-backdrop" id="launcherBackdrop" aria-hidden="true"></div>
-<aside class="lp-launcher" id="toolLauncher" role="dialog" aria-modal="true" aria-labelledby="launcherTitle" aria-hidden="true">
-  <div class="lp-launcher__top">
-    <div class="lp-launcher__titlewrap">
-      <span class="lp-launcher__badge">TOOL LAUNCHER</span>
-      <h2 id="launcherTitle">เลือกเครื่องมือที่ตรงกับสิ่งที่คุณต้องการทำ</h2>
-      <p>ค้นหาและเปิดเครื่องมือได้ทันที โดยไม่ต้องไล่เมนูหลายชั้น</p>
-    </div>
-    <button type="button" class="lp-launcher__close" id="launcherClose" aria-label="Close launcher">✕</button>
+<div class="cd-launcher-backdrop" id="launcherBackdrop" aria-hidden="true"></div>
+<aside class="cd-launcher" id="toolLauncher" role="dialog" aria-modal="true" aria-labelledby="launcherTitle" aria-hidden="true">
+  <div class="cd-launcher__head">
+    <div><span class="cd-eyebrow">TOOL LAUNCHER</span><h2 id="launcherTitle">เลือกเครื่องมือที่ตรงกับงาน</h2><p>ค้นหาและเปิดเครื่องมือได้ทันที</p></div>
+    <button type="button" class="cd-icon-btn cd-launcher__close" id="launcherClose" aria-label="Close tool launcher">×</button>
   </div>
-
-  <div class="lp-launcher__search">
-    <input id="launcherSearch" type="search" placeholder="ค้นหาเครื่องมือ..." autocomplete="off" spellcheck="false">
-    <span id="launcherCount">0</span>
+  <div class="cd-launcher__search"><span>⌕</span><input id="launcherSearch" type="search" placeholder="ค้นหาเครื่องมือ เช่น PID, VTX, Battery..." autocomplete="off" spellcheck="false"><strong id="launcherCount">0</strong></div>
+  <div class="cd-launcher__tabs" role="tablist" aria-label="Tool categories">
+    <button type="button" class="is-active" data-cat="ALL" role="tab">ALL</button><button type="button" data-cat="Analyze" role="tab">ANALYZE</button><button type="button" data-cat="Tune" role="tab">TUNE</button><button type="button" data-cat="Hardware" role="tab">HARDWARE</button><button type="button" data-cat="Explore" role="tab">EXPLORE</button>
   </div>
-
-  <div class="lp-launcher__tabs" role="tablist" aria-label="Tool categories">
-    <button type="button" class="lp-tab is-active" data-cat="ALL" role="tab">All</button>
-    <button type="button" class="lp-tab" data-cat="Analyze" role="tab">Analyze</button>
-    <button type="button" class="lp-tab" data-cat="Tune" role="tab">Tune</button>
-    <button type="button" class="lp-tab" data-cat="Hardware" role="tab">Hardware</button>
-    <button type="button" class="lp-tab" data-cat="Explore" role="tab">Explore</button>
-  </div>
-
-  <div class="lp-launcher__grid" id="launcherGrid"></div>
-  <div class="lp-launcher__empty" id="launcherEmpty" hidden>
-    <strong>ไม่พบเครื่องมือ</strong>
-    <span>ลองเปลี่ยนคำค้น หรือเลือกหมวดอื่น</span>
-  </div>
+  <div class="cd-launcher__grid" id="launcherGrid"></div>
+  <div class="cd-launcher__empty" id="launcherEmpty" hidden><strong>ไม่พบเครื่องมือ</strong><span>ลองเปลี่ยนคำค้นหรือหมวด</span></div>
 </aside>
 {% endblock %}
 
