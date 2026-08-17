@@ -20,7 +20,7 @@ body{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;paddi
   background:rgba(11,21,32,0.95);
   border:1px solid rgba(16,196,122,0.18);
   border-radius:20px;padding:52px 44px 44px;
-  text-align:center;max-width:440px;width:100%;
+  text-align:center;max-max-width:440px;width:100%;width:100%;
   backdrop-filter:blur(24px);
   box-shadow:0 32px 80px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.05);
   animation:fadeUp .5s var(--ease) both;
@@ -35,10 +35,10 @@ body{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;paddi
 
 @media(max-width:540px){
   body{padding:16px}
-  .err-card{max-width:100%!important;width:auto!important;margin:20px 16px!important;padding:28px 16px!important}
-  .err-code{font-size:clamp(3rem,18vw,5rem)}
-  .err-actions{flex-direction:column;gap:8px;align-items:stretch}
-  .err-actions a{display:block;text-align:center}
+  .error-box,.error-card{max-width:100%!important;width:auto!important;margin:20px 16px!important;padding:28px 16px!important}
+  .error-code{font-size:clamp(3rem,18vw,5rem)}
+  .error-actions,.error-btns{flex-direction:column;gap:8px;align-items:stretch}
+  .error-actions a,.error-btns a{display:block;text-align:center}
 }
 </style>
 
