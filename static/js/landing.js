@@ -1,63 +1,70 @@
 (function () {
-  const topbar = document.getElementById('topbar');
+  'use strict';
+
   const launcher = document.getElementById('toolLauncher');
   const backdrop = document.getElementById('launcherBackdrop');
   const openers = document.querySelectorAll('.js-launcher-open');
   const closeBtn = document.getElementById('launcherClose');
   const search = document.getElementById('launcherSearch');
   const count = document.getElementById('launcherCount');
-  const tabs = Array.from(document.querySelectorAll('.lp-tab'));
+  const tabs = Array.from(document.querySelectorAll('.cd-launcher__tabs button'));
   const grid = document.getElementById('launcherGrid');
   const empty = document.getElementById('launcherEmpty');
+  const topbar = document.getElementById('topbar');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const tools = Array.isArray(window.__CONFIGDOCTOR_TOOL_LAUNCHER__)
     ? window.__CONFIGDOCTOR_TOOL_LAUNCHER__
     : [];
 
-  let activeCat = 'ALL';
-  let scrollLock = false;
-
   const icons = {
-    core: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M7 12h2l1-3 2 6 1-3h2"></path></svg>',
-    tune: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="5" x2="8" y2="19"></line><line x1="12" y1="5" x2="12" y2="19"></line><line x1="16" y1="5" x2="16" y2="19"></line><circle cx="8" cy="12" r="2" fill="currentColor"></circle><circle cx="12" cy="8" r="2" fill="currentColor"></circle><circle cx="16" cy="16" r="2" fill="currentColor"></circle></svg>',
-    hw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.2 5.7L20 10l-5 3.3L16.2 19 12 15.9 7.8 19 9 13.3 4 10l5.8-2.3z"></path></svg>',
-    explore: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l3.2 6.5L22 10l-5 4.9L18.4 22 12 18.7 5.6 22 7 14.9 2 10l6.8-.5z"></path></svg>'
+    core: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M7 13h2l1.2-4 2.6 7 1.2-3H17"></path></svg>',
+    tune: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4v16M12 4v16M18 4v16"></path><circle cx="6" cy="9" r="2"></circle><circle cx="12" cy="15" r="2"></circle><circle cx="18" cy="8" r="2"></circle></svg>',
+    hw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.3 5.2L20 10l-4.2 3.7L17 19l-5-2.8L7 19l1.2-5.3L4 10l5.7-1.8z"></path></svg>',
+    explore: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"></circle><path d="m14.8 9.2-2 4.3-4.3 2 2-4.3z"></path></svg>'
   };
 
-  function matches(tool, query) {
-    if (activeCat !== 'ALL' && tool.cat !== activeCat) return false;
-    if (!query) return true;
-    const hay = `${tool.name} ${tool.desc} ${tool.cat}`.toLowerCase();
-    return hay.includes(query);
+  let activeCat = 'ALL';
+  let lastOpener = null;
+  let locked = false;
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+  }
+
+  function filteredTools() {
+    const query = (search?.value || '').trim().toLowerCase();
+    return tools.filter((tool) => {
+      if (activeCat !== 'ALL' && tool.cat !== activeCat) return false;
+      if (!query) return true;
+      return `${tool.name} ${tool.desc} ${tool.cat}`.toLowerCase().includes(query);
+    });
   }
 
   function render() {
-    const q = (search.value || '').trim().toLowerCase();
-    const filtered = tools.filter((tool) => matches(tool, q));
-
+    if (!grid || !count || !empty) return;
+    const filtered = filteredTools();
     count.textContent = String(filtered.length);
     empty.hidden = filtered.length !== 0;
-    grid.innerHTML = filtered.map((tool) => `
-      <a class="lp-launcher-item" href="${tool.href}">
-        <span class="lp-launcher-item__icon is-${tool.icon}">${icons[tool.icon] || icons.core}</span>
-        <strong>${tool.name}</strong>
-        <p>${tool.desc}</p>
-      </a>
-    `).join('');
-
+    grid.innerHTML = filtered.map((tool) => {
+      const icon = icons[tool.icon] || icons.core;
+      return `<a class="cd-launcher-item" href="${escapeHtml(tool.href)}"><span class="cd-launcher-item__icon is-${escapeHtml(tool.icon || 'core')}">${icon}</span><strong>${escapeHtml(tool.name)}</strong><p>${escapeHtml(tool.desc)}</p></a>`;
+    }).join('');
     tabs.forEach((tab) => tab.classList.toggle('is-active', tab.dataset.cat === activeCat));
   }
 
-  function openLauncher() {
+  function openLauncher(event) {
     if (!launcher || !backdrop) return;
+    lastOpener = event?.currentTarget || document.activeElement;
     launcher.classList.add('is-open');
     backdrop.classList.add('is-open');
     launcher.setAttribute('aria-hidden', 'false');
     backdrop.setAttribute('aria-hidden', 'false');
+    openers.forEach((btn) => btn.setAttribute('aria-expanded', 'true'));
+    locked = true;
     document.body.style.overflow = 'hidden';
-    scrollLock = true;
     render();
-    setTimeout(() => search?.focus(), 120);
+    window.setTimeout(() => search?.focus(), reduceMotion ? 0 : 100);
   }
 
   function closeLauncher() {
@@ -66,28 +73,47 @@
     backdrop.classList.remove('is-open');
     launcher.setAttribute('aria-hidden', 'true');
     backdrop.setAttribute('aria-hidden', 'true');
+    openers.forEach((btn) => btn.setAttribute('aria-expanded', 'false'));
+    locked = false;
     document.body.style.overflow = '';
-    scrollLock = false;
+    if (lastOpener && typeof lastOpener.focus === 'function') window.setTimeout(() => lastOpener.focus(), 0);
   }
 
   openers.forEach((btn) => btn.addEventListener('click', openLauncher));
   closeBtn?.addEventListener('click', closeLauncher);
   backdrop?.addEventListener('click', closeLauncher);
-
   search?.addEventListener('input', render);
   tabs.forEach((tab) => tab.addEventListener('click', () => {
     activeCat = tab.dataset.cat || 'ALL';
     render();
   }));
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && launcher?.classList.contains('is-open')) closeLauncher();
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && launcher?.classList.contains('is-open')) closeLauncher();
+    if (event.key === '/' && !locked && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+      event.preventDefault();
+      openLauncher();
+    }
   });
 
-  document.addEventListener('scroll', () => {
-    if (!topbar) return;
-    topbar.classList.toggle('is-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', () => {
+    topbar?.classList.toggle('is-scrolled', window.scrollY > 10);
   }, { passive: true });
+
+  const revealTargets = document.querySelectorAll('.cd-reveal');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealTargets.forEach((el) => observer.observe(el));
+  } else {
+    revealTargets.forEach((el) => el.classList.add('is-visible'));
+  }
 
   render();
 })();
