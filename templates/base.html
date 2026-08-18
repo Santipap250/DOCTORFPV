@@ -14,6 +14,9 @@
 <meta name="theme-color" content="#05080b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<!-- Phase 1 — canonical design tokens + pattern library, loaded on every page -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/patterns.css') }}">
 {% set _page_css = self.page_css() %}
 {% if _page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/' ~ _page_css) }}">{% endif %}
 {% block extra_css_links %}{% endblock %}
@@ -27,6 +30,7 @@
 {% if _chrome | trim == "true" %}{% include "partials/page_actions.html" %}{% endif %}
 {% block content %}{% endblock %}
 {% if _chrome | trim == "true" %}{% include "partials/footer_nav.html" %}{% endif %}
+<script src="{{ url_for('static', filename='js/patterns.js') }}" defer></script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>
