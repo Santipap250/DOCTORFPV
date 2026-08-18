@@ -11,6 +11,7 @@
 import os, io, re, time, json, hashlib, logging
 import sqlite3, threading as _threading
 from datetime import datetime
+from pathlib import Path as _Path
 
 from flask import request
 
@@ -30,18 +31,38 @@ from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("configdoctor")
 
-import sqlite3, threading as _threading
-
-_DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'community.db')
 _db_lock = _threading.Lock()
+
+
+def _resolve_community_db_path():
+    """Resolve the SQLite community DB path.
+
+    Priority (Phase 11 — data abstraction, distributed-safe on Render):
+      1. COMMUNITY_DB_PATH  — explicit override (preferred going forward)
+      2. DATABASE_PATH      — legacy env var name, kept for backward compat
+      3. <repo>/data/community.db — default local/dev location
+
+    Re-resolved on every call (not cached at import time) so tests can
+    monkeypatch the env vars and reload the module to see a new path.
+    """
+    community_override = os.environ.get("COMMUNITY_DB_PATH")
+    if community_override:
+        return _Path(community_override)
+    legacy_override = os.environ.get("DATABASE_PATH")
+    if legacy_override:
+        return _Path(legacy_override)
+    return _Path(os.path.dirname(__file__)) / 'data' / 'community.db'
 
 
 def _get_db():
     """Open (or create) the SQLite community DB and ensure tables exist."""
-    os.makedirs(os.path.dirname(_DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(_DB_PATH, check_same_thread=False)
+    db_path = _resolve_community_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(db_path), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")
+    conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ratings (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
