@@ -9,6 +9,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, Response
 
 from app import _BASE_URL, _SITEMAP_CACHE
+from logic.tool_registry import TOOL_REGISTRY
 
 bp = Blueprint('meta', __name__)
 
@@ -56,37 +57,13 @@ def sitemap_xml():
             and _SITEMAP_CACHE.get("xml")):
         xml = _SITEMAP_CACHE["xml"]
     else:
-        pages = [
-            ("/team",             "monthly", "0.7"),
-            ("/flight-quiz",      "weekly",  "0.8"),
-            ("/bf-wizard",        "weekly",  "0.9"),
-            ("/build-card",       "weekly",  "0.8"),
-            ("/tuning-log",       "weekly",  "0.7"),
-            ("/leaderboard",      "weekly",  "0.8"),
-            ("/landing",          "weekly",  "1.0"),
-            ("/blackbox",         "weekly",  "1.0"),
-            ("/app",              "weekly",  "0.9"),
-            ("/cli_surgeon",      "weekly",  "0.9"),
-            ("/pid-advisor",      "weekly",  "0.9"),
-            ("/quick-tune",       "weekly",  "0.9"),
-            ("/rpm-filter",       "weekly",  "0.8"),
-            ("/motor-prop",       "weekly",  "0.8"),
-            ("/rates-visualizer", "weekly",  "0.8"),
-            ("/cli-comparator",   "weekly",  "0.8"),
-            ("/esc-checker",      "weekly",  "0.8"),
-            ("/fpv-trainer",      "weekly",  "0.9"),
-            ("/battery-health",   "weekly",  "0.8"),
-            ("/motor-thermal",    "weekly",  "0.8"),
-            ("/loop-analyzer",    "weekly",  "0.8"),
-            ("/osd",              "weekly",  "0.7"),
-            ("/vtx",              "monthly", "0.6"),
-            ("/vtx-range",        "monthly", "0.6"),
-            ("/vtx-smartaudio",   "monthly", "0.6"),
-            ("/downloads",        "weekly",  "0.7"),
-            ("/fpv",              "monthly", "0.6"),
-            ("/about",            "monthly", "0.5"),
-            ("/changelog",        "weekly",  "0.5"),
-            ("/military-uas",     "weekly",  "0.8"),
+        # Phase 3 — page list is generated from the canonical tool registry
+        # (logic/tool_registry.py) instead of being hand-maintained here.
+        # /landing is the one public page that isn't itself a "tool" so it
+        # stays as an explicit addition.
+        pages = [("/landing", "weekly", "1.0")] + [
+            (t["route"], t["changefreq"], f"{t['priority']:.1f}")
+            for t in TOOL_REGISTRY
         ]
         base = _BASE_URL
         urls = "\n".join(
