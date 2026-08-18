@@ -19,7 +19,7 @@ from flask import (Flask, render_template, request, send_from_directory,
 from flask import (Flask, render_template, request, send_from_directory,
                    abort, send_file, jsonify, url_for)
 from werkzeug.middleware.proxy_fix import ProxyFix
-import os, time, logging, hashlib
+import os, time, logging, hashlib, json
 from datetime import datetime
 
 from core import (
@@ -45,6 +45,10 @@ from core import (
     _cleanup_osd_files, _timestamped_filename,
     _generate_osd_text_from_model, _generate_cli_from_model,
 )
+
+# Phase 3 — canonical tool registry (single source for nav/search/sitemap)
+from logic.tool_registry import TOOL_REGISTRY, get_tools, get_tool_by_route, get_categories
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RATINGS & LIKES — SQLite persistent storage
@@ -143,6 +147,26 @@ _BASE_URL = os.environ.get("BASE_URL", "https://configdoctor.onrender.com").rstr
 def inject_base_url():
     """Inject BASE_URL into every Jinja2 template context."""
     return {"BASE_URL": _BASE_URL}
+
+
+@app.context_processor
+def inject_tool_registry():
+    """Phase 3 — inject the canonical tool registry into every template.
+
+    `tool_registry` is the raw list (for templates that want to loop over
+    it directly in Jinja). `tool_registry_json` is a pre-serialized JSON
+    string (via Flask's tojson filter would also work, but this keeps the
+    JS embed identical to how nav.html and landing.html need it — a
+    single `<script>var TOOL_REGISTRY = ...;</script>` line).
+    """
+    return {
+        "tool_registry": TOOL_REGISTRY,
+        # Escape "</" so the embedded JSON can never prematurely close a
+        # surrounding <script> tag (defense-in-depth; current icon/label
+        # data doesn't contain this, but future entries might).
+        "tool_registry_json": json.dumps(TOOL_REGISTRY, ensure_ascii=False).replace("</", "<\\/"),
+    }
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
