@@ -1,0 +1,193 @@
+/*
+ * static/css/patterns.css — OBIX ConfigDoctor Pattern Library
+ * ============================================================
+ * Phase 1 of the Command Center rebuild. Reusable, mobile-first
+ * building blocks shared across every tool page. All classes are
+ * prefixed `dc-` (DoctorFPV Command) to avoid colliding with the
+ * existing `.v5-*` / `.cc-*` classes already used in templates —
+ * this is additive, new pages/batches can adopt it incrementally.
+ *
+ * Depends only on tokens.css (loaded first in base.html).
+ * Every interactive element here meets the >=44px touch target
+ * requirement (Phase 7) and respects prefers-reduced-motion.
+ */
+
+/* ── Top bar ─────────────────────────────────────────────────── */
+.dc-topbar {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: var(--sp-3);
+  min-height: var(--touch-min);
+  padding: var(--sp-3) var(--sp-4);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.dc-topbar__brand { font-family: var(--font-head); font-size: var(--text-md); color: var(--text); }
+.dc-topbar__spacer { flex: 1; }
+.dc-topbar__action {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--touch-min); min-height: var(--touch-min);
+  border-radius: var(--radius-sm); color: var(--text-2);
+}
+
+/* ── Mobile bottom navigation ────────────────────────────────── */
+.dc-bottomnav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  display: flex; justify-content: space-around;
+  padding: var(--sp-2) var(--sp-2) max(var(--sp-2), env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+}
+.dc-bottomnav__item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-width: var(--touch-min); min-height: var(--touch-min);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius-sm);
+  color: var(--muted); font-size: var(--text-2xs);
+  transition: color var(--dur) var(--ease);
+}
+.dc-bottomnav__item.is-active { color: var(--green); }
+@media (min-width: 1024px) { .dc-bottomnav { display: none; } }
+
+/* ── Command / search bar ───────────────────────────────────── */
+.dc-searchbar {
+  display: flex; align-items: center; gap: var(--sp-2);
+  min-height: var(--touch-min);
+  padding: 0 var(--sp-4);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--dur) var(--ease);
+}
+.dc-searchbar:focus-within { border-color: rgba(16,196,122,0.45); box-shadow: 0 0 0 3px var(--green-dim); }
+.dc-searchbar input {
+  flex: 1; min-height: var(--touch-min); background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--font-body); font-size: var(--text-base);
+}
+.dc-searchbar input::placeholder { color: var(--muted); }
+
+/* ── Section header ──────────────────────────────────────────── */
+.dc-section-header { margin-bottom: var(--sp-4); }
+.dc-section-header__eyebrow {
+  font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .08em;
+  text-transform: uppercase; color: var(--green);
+}
+.dc-section-header__title { font-family: var(--font-head); font-size: var(--text-xl); color: var(--text); margin-top: var(--sp-1); }
+.dc-section-header__desc { font-size: var(--text-sm); color: var(--muted); margin-top: var(--sp-2); }
+
+/* ── Tool card ───────────────────────────────────────────────── */
+.dc-tool-card {
+  display: flex; flex-direction: column; gap: var(--sp-2);
+  min-height: var(--touch-min);
+  padding: var(--sp-4);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.dc-tool-card:hover, .dc-tool-card:focus-visible {
+  border-color: rgba(16,196,122,0.3); transform: translateY(-2px); box-shadow: var(--shadow-sm);
+}
+.dc-tool-card__icon { width: 28px; height: 28px; color: var(--green); }
+.dc-tool-card__title { font-size: var(--text-base); font-weight: 600; color: var(--text); }
+.dc-tool-card__desc { font-size: var(--text-sm); color: var(--muted); }
+.dc-tool-card__status {
+  align-self: flex-start; font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: .06em;
+  padding: 2px var(--sp-2); border-radius: 999px;
+}
+.dc-tool-card__status--stable { background: var(--green-dim); color: var(--green-lite); }
+.dc-tool-card__status--beta { background: var(--cyan-dim); color: var(--cyan); }
+.dc-tool-card__status--experimental { background: var(--warning-dim); color: var(--warning); }
+
+/* ── Form field ──────────────────────────────────────────────── */
+.dc-field { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.dc-field__label { font-size: var(--text-sm); color: var(--text-2); font-weight: 600; }
+.dc-field__hint { font-size: var(--text-xs); color: var(--muted); }
+.dc-field__input, .dc-field__select {
+  width: 100%; min-height: var(--touch-min);
+  padding: var(--sp-3); background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font-mono); font-size: var(--text-sm);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.dc-field__input:focus, .dc-field__select:focus {
+  outline: none; border-color: rgba(16,196,122,0.45); box-shadow: 0 0 0 3px var(--green-dim);
+}
+.dc-field__error { font-size: var(--text-xs); color: var(--error); display: none; }
+.dc-field.is-invalid .dc-field__input { border-color: var(--error); }
+.dc-field.is-invalid .dc-field__error { display: block; }
+
+/* ── Result card / Stat card ────────────────────────────────── */
+.dc-result-card {
+  padding: var(--sp-5); background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); margin-bottom: var(--sp-4);
+}
+.dc-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
+@media (min-width: 640px) { .dc-stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.dc-stat-card {
+  padding: var(--sp-4); background: var(--surface-raised); border: 1px solid var(--border);
+  border-radius: var(--radius); text-align: center;
+}
+.dc-stat-card__value { font-family: var(--font-head); font-size: var(--text-xl); color: var(--text); }
+.dc-stat-card__label { font-size: var(--text-xs); color: var(--muted); margin-top: var(--sp-1); text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── Alert ───────────────────────────────────────────────────── */
+.dc-alert {
+  display: flex; align-items: flex-start; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4); border-radius: var(--radius); border: 1px solid;
+  font-size: var(--text-sm);
+}
+.dc-alert--info    { background: var(--cyan-dim);    border-color: rgba(34,211,238,0.3);  color: var(--text); }
+.dc-alert--success { background: var(--green-dim);   border-color: rgba(16,196,122,0.3);  color: var(--text); }
+.dc-alert--warning { background: var(--warning-dim); border-color: rgba(245,158,11,0.3);  color: var(--text); }
+.dc-alert--error   { background: var(--error-dim);   border-color: rgba(248,81,73,0.3);   color: var(--text); }
+
+/* ── CLI code block + copy/download buttons ─────────────────── */
+.dc-cli-block {
+  position: relative; background: #05070a; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--sp-4);
+  font-family: var(--font-mono); font-size: var(--text-sm); color: var(--green-lite);
+  overflow-x: auto; white-space: pre;
+}
+.dc-cli-block__actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); flex-wrap: wrap; }
+
+.dc-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  min-height: var(--touch-min); min-width: var(--touch-min);
+  padding: 0 var(--sp-4); border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-raised); color: var(--text);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.dc-btn:hover, .dc-btn:focus-visible { border-color: var(--border-hi); transform: translateY(-1px); }
+.dc-btn--primary { background: var(--green-dim); border-color: rgba(16,196,122,0.4); color: var(--green-lite); }
+.dc-btn--primary:hover { background: rgba(16,196,122,0.18); box-shadow: var(--green-glow); }
+.dc-btn--copy.is-copied { background: var(--green-dim); border-color: rgba(16,196,122,0.4); color: var(--green-lite); }
+
+/* ── Loading / empty / error states ─────────────────────────── */
+.dc-state { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--sp-3); padding: var(--sp-10) var(--sp-4); color: var(--muted); }
+.dc-state__title { color: var(--text); font-size: var(--text-base); font-weight: 600; }
+.dc-state__desc { font-size: var(--text-sm); max-width: 40ch; }
+.dc-spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--green);
+  animation: dc-spin 0.8s linear infinite;
+}
+@keyframes dc-spin { to { transform: rotate(360deg); } }
+
+/* ── "Next step" panel ───────────────────────────────────────── */
+.dc-next-step {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-4); border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--green-dim), transparent);
+  border: 1px solid rgba(16,196,122,0.25);
+}
+.dc-next-step__label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--green); }
+.dc-next-step__text { font-size: var(--text-sm); color: var(--text); margin-top: 2px; }
+.dc-next-step__action { margin-left: auto; }
+
+/* ── Reduced motion (Phase 7/8 requirement, app-wide) ───────── */
+@media (prefers-reduced-motion: reduce) {
+  .dc-tool-card, .dc-btn, .dc-bottomnav__item, .dc-spinner {
+    transition: none !important; animation-duration: 0.001ms !important;
+  }
+}

@@ -1,27 +1,14 @@
 /* OBIX ConfigDoctor — Command Center UI
    Mobile-first visual system. Loaded on landing.html only.
+
+   Phase 1 (design-system consolidation): the --cc-* variables below are
+   now defined once, canonically, in static/css/tokens.css (loaded
+   globally in base.html, before this file) and simply aliased there
+   to the app-wide palette. This file no longer redeclares them locally
+   so landing.html can't drift out of sync with the rest of the app —
+   all --cc-* custom-property usages further down in this file are
+   unchanged and keep working exactly as before.
 */
-:root{
-  --cc-bg:#05080b;
-  --cc-surface:#0a1015;
-  --cc-surface-2:#0d151c;
-  --cc-line:rgba(255,255,255,.08);
-  --cc-line-strong:rgba(47,232,142,.28);
-  --cc-text:#eef7f3;
-  --cc-muted:#8fa49d;
-  --cc-green:#35ef91;
-  --cc-cyan:#40cfff;
-  --cc-amber:#ffc857;
-  --cc-red:#ff647d;
-  --cc-purple:#a889ff;
-  --cc-shadow:0 20px 60px rgba(0,0,0,.35);
-  --cc-radius:18px;
-  --cc-radius-sm:12px;
-  --cc-max:1180px;
-  --cc-font-display:'Orbitron',sans-serif;
-  --cc-font-body:'Sarabun',sans-serif;
-  --cc-font-mono:'JetBrains Mono',monospace;
-}
 html{scroll-behavior:smooth}
 body.cc-page{
   margin:0;

@@ -1,0 +1,139 @@
+/*
+ * static/css/tokens.css — OBIX ConfigDoctor Design Tokens
+ * ============================================================
+ * Phase 1 of the Command Center rebuild — ONE canonical token
+ * set for the whole app. Loaded globally via base.html, before
+ * any per-page stylesheet.
+ *
+ * This file does not replace static/css/site-theme.css,
+ * static/css/style.css, or static/css/command-center.css — those
+ * still work exactly as before. It sits underneath them and:
+ *   1. Declares the canonical variable names/values going forward
+ *      (new pattern library in patterns.css uses ONLY these).
+ *   2. Declares alias variables for the older naming schemes
+ *      already used across templates (--bg-card, --gold,
+ *      --radius-lg, --cc-bg, ...) so every stylesheet in the app
+ *      resolves to the same underlying values instead of three
+ *      independently-maintained palettes drifting apart.
+ *
+ * Values below are the audited canonical palette (matches what
+ * site-theme.css/style.css already render — no visual change).
+ */
+
+:root {
+  /* ── Background ─────────────────────────────────────────── */
+  --bg:            #07090b;
+  --bg-2:          #070f14;
+
+  /* ── Surface (base / raised / elevated) ─────────────────── */
+  --surface:          #0b1520;
+  --surface-raised:   #0f1c2a;
+  --surface-elevated: #142130;
+
+  /* ── Borders ─────────────────────────────────────────────── */
+  --border:    rgba(255,255,255,0.055);
+  --border-2:  rgba(255,255,255,0.04);
+  --border-hi: rgba(255,255,255,0.12);
+
+  /* ── Text ────────────────────────────────────────────────── */
+  --text:    #dde8f0;
+  --text-2:  #8aabb8;
+  --muted:   #7a8fa0;
+  --muted-2: #5a7a8a;
+
+  /* ── Accents ─────────────────────────────────────────────── */
+  --green:      #10c47a;
+  --green-lite: #2dd896;
+  --green-dim:  rgba(16,196,122,0.11);
+  --green-glow: 0 0 20px rgba(16,196,122,0.22);
+
+  --cyan:     #22d3ee;
+  --cyan-dim: rgba(34,211,238,0.10);
+
+  --warning:     #f59e0b;
+  --warning-dim: rgba(245,158,11,0.10);
+
+  --error:     #f85149;
+  --error-dim: rgba(248,81,73,0.11);
+
+  --blue:       #58a6ff;
+  --blue-dim:   rgba(88,166,255,0.11);
+  --purple:     #c9a6ff;
+  --purple-dim: rgba(201,166,255,0.11);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251,146,60,0.10);
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --font-body: 'Sarabun', system-ui, sans-serif;
+  --font-head: 'Orbitron', monospace;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-2xs: 10px; --text-xs: 11px; --text-sm: 13px; --text-base: 15px;
+  --text-md: 17px;  --text-lg: 20px; --text-xl: 26px;
+  --text-2xl: 34px; --text-3xl: 48px;
+
+  /* ── Spacing ─────────────────────────────────────────────── */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+  --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+
+  /* ── Radius ──────────────────────────────────────────────── */
+  --radius-sm: 6px; --radius: 10px; --radius-lg: 14px; --radius-xl: 18px;
+
+  /* ── Shadow (new — Phase 1 gap fill, values match style.css) ─ */
+  --shadow-sm: 0 4px 18px rgba(0,0,0,0.38);
+  --shadow:    0 16px 48px rgba(0,0,0,0.65);
+  --shadow-lg: 0 24px 64px rgba(0,0,0,0.55);
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --ease: cubic-bezier(0.4,0,0.2,1);
+  --dur: 200ms;
+
+  /* ── Touch target minimum (Phase 7 mobile requirement) ──── */
+  --touch-min: 44px;
+
+  /* ────────────────────────────────────────────────────────────
+     Backward-compat aliases for existing naming schemes already
+     used in templates. Point them at the canonical values above
+     so site-theme.css / style.css / command-center.css can be
+     migrated to these later without a flag-day rewrite.
+     ──────────────────────────────────────────────────────────── */
+
+  /* site-theme.css naming */
+  --surface2: var(--surface-raised);
+  --surface3: var(--surface-elevated);
+  --amber: var(--warning);
+  --amber-dim: var(--warning-dim);
+  --red: var(--error);
+  --red-dim: var(--error-dim);
+
+  /* style.css naming */
+  --bg-card: var(--surface);
+  --bg-input: var(--surface-raised);
+  --bg-elevated: var(--surface-elevated);
+  --faint: rgba(255,255,255,0.25);
+  --gold: var(--warning);
+  --gold-dim: var(--warning-dim);
+  --green-mid: #0ea368;
+  --radius-md: var(--radius);
+
+  /* command-center.css (cc-*) naming */
+  --cc-bg: var(--bg);
+  --cc-surface: var(--surface);
+  --cc-surface-2: var(--surface-raised);
+  --cc-line: var(--border-hi);
+  --cc-line-strong: rgba(47,232,142,0.28);
+  --cc-text: var(--text);
+  --cc-muted: var(--text-2);
+  --cc-green: var(--green-lite);
+  --cc-cyan: #40cfff;
+  --cc-amber: var(--warning);
+  --cc-red: var(--error);
+  --cc-purple: var(--purple);
+  --cc-shadow: var(--shadow-lg);
+  --cc-radius: var(--radius-xl);
+  --cc-radius-sm: var(--radius-lg);
+  --cc-max: 1180px;
+  --cc-font-display: var(--font-head);
+  --cc-font-body: var(--font-body);
+  --cc-font-mono: var(--font-mono);
+}
