@@ -10,6 +10,10 @@
 <meta name="viewport" content="{% block page_viewport %}width=device-width,initial-scale=1.0{% endblock %}">
 <title>{% block title %}{{ self.page_og_title() | forceescape }}{% endblock %}</title>
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#05080b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 {% set _page_css = self.page_css() %}
 {% if _page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/' ~ _page_css) }}">{% endif %}
 {% block extra_css_links %}{% endblock %}
