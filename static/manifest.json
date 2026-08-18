@@ -1,11 +1,11 @@
 {
-  "name": "OBIXConfig Doctor",
+  "name": "OBIX ConfigDoctor — FPV Command Center",
   "short_name": "ConfigDoctor",
-  "description": "Web application for analyzing FPV drone CLI dumps.",
-  "start_url": "/",
+  "description": "FPV diagnostic, tuning and analysis toolkit.",
+  "start_url": "/landing",
   "display": "standalone",
-  "background_color": "#040808",
-  "theme_color": "#00ff44",
+  "background_color": "#05080b",
+  "theme_color": "#05080b",
   "icons": [
     {
       "src": "/static/android-chrome-192x192.png",
@@ -31,5 +31,7 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "scope": "/",
+  "orientation": "portrait"
 }
