@@ -41,7 +41,7 @@
         </div>
       </div>
       <div class="cc-metrics" aria-label="Tool system metrics">
-        <div class="cc-metric"><b>20+</b><span>เครื่องมือเฉพาะทาง</span></div>
+        <div class="cc-metric"><b>{{ tool_registry | length }}</b><span>เครื่องมือเฉพาะทาง</span></div>
         <div class="cc-metric"><b>1</b><span>ศูนย์ควบคุมเดียว</span></div>
         <div class="cc-metric"><b>CSV</b><span>รองรับ Blackbox</span></div>
         <div class="cc-metric"><b>CLI</b><span>พร้อมส่งออก</span></div>
@@ -58,14 +58,11 @@
       </div>
       <div class="cc-filter-row" role="tablist" aria-label="หมวดเครื่องมือ">
         <button class="cc-filter is-active" type="button" data-cc-filter="all">ALL</button>
-        <button class="cc-filter" type="button" data-cc-filter="analyze">ANALYZE</button>
-        <button class="cc-filter" type="button" data-cc-filter="tune">TUNE</button>
-        <button class="cc-filter" type="button" data-cc-filter="hardware">HARDWARE</button>
-        <button class="cc-filter" type="button" data-cc-filter="setup">SETUP</button>
-        <button class="cc-filter" type="button" data-cc-filter="learn">LEARN</button>
-        <button class="cc-filter" type="button" data-cc-filter="community">COMMUNITY</button>
+        {% for cat in tool_registry | map(attribute='category') | unique | list %}
+        <button class="cc-filter" type="button" data-cc-filter="{{ cat | lower }}">{{ cat }}</button>
+        {% endfor %}
       </div>
-      <span data-cc-count style="color:#60736c;font:700 9px 'JetBrains Mono',monospace">25 tools</span>
+      <span data-cc-count style="color:#60736c;font:700 9px 'JetBrains Mono',monospace">tools</span>
     </section>
 
     <section class="cc-section" id="tools" aria-labelledby="tools-title">
@@ -75,119 +72,25 @@
       </div>
 
       <div class="cc-tools">
-        <a class="cc-tool featured" data-cc-tool data-category="analyze tune" data-keywords="drone analyzer pid filter motor battery thrust flight time cli" href="/app">
-          <div class="cc-tool-top"><span class="cc-tool-icon">✦</span><span class="cc-tool-badge">CORE</span></div>
-          <div class="cc-tool-title">Drone Analyzer</div>
-          <div class="cc-tool-desc">จุดเริ่มต้นหลักของการวิเคราะห์: class, motor, battery, thrust, PID และ filter พร้อมผลลัพธ์ที่ต่อยอดไปยังการจูนได้</div>
+        {% set launcher_excluded = ['about', 'team', 'changelog'] %}
+        {% set accent_by_category = {'HW': 'cyan', 'VIDEO': 'purple', 'EXPLORE': 'amber'} %}
+        {% for t in tool_registry if t.id not in launcher_excluded %}
+        {% set featured = t.id in ('app', 'blackbox') %}
+        <a class="cc-tool{{ ' featured' if featured else '' }}" data-cc-tool
+           data-category="{{ t.category | lower }}" data-keywords="{{ (t.keywords | join(' ')) }} {{ t.label | lower }}"
+           {% if accent_by_category.get(t.category) %}data-accent="{{ accent_by_category[t.category] }}"{% endif %}
+           href="{{ t.route }}">
+          <div class="cc-tool-top">
+            <span class="cc-tool-icon">{{ t.icon | safe }}</span>
+            {% if t.status != 'stable' %}<span class="cc-tool-badge cc-tool-badge--{{ t.status }}">{{ t.status | upper }}</span>{% endif %}
+          </div>
+          <div class="cc-tool-title">{{ t.label }}</div>
+          <div class="cc-tool-desc">{{ t.description }}</div>
           <span class="cc-tool-arrow">เปิดเครื่องมือ →</span>
         </a>
-
-        <a class="cc-tool featured" data-cc-tool data-category="analyze" data-keywords="blackbox csv log pid noise frequency spectrum" data-accent="cyan" href="/blackbox">
-          <div class="cc-tool-top"><span class="cc-tool-icon">▥</span><span class="cc-tool-badge">HOT</span></div>
-          <div class="cc-tool-title">Blackbox Analyzer</div>
-          <div class="cc-tool-desc">อัปโหลด log แล้วอ่านสัญญาณ, noise, frequency และจุดที่ควรตรวจต่อ ลดการเดาจากความรู้สึกอย่างเดียว</div>
-          <span class="cc-tool-arrow">วิเคราะห์ Log →</span>
-        </a>
-
-        <a class="cc-tool" data-cc-tool data-category="tune analyze" data-keywords="pid advisor symptom oscillation bounce propwash tune" href="/pid-advisor">
-          <div class="cc-tool-top"><span class="cc-tool-icon">⌁</span><span class="cc-tool-badge">SMART</span></div>
-          <div class="cc-tool-title">PID Advisor</div><div class="cc-tool-desc">เลือกอาการ → ไล่สาเหตุ → ได้แนวทางแก้แบบเป็นขั้นตอน</div><span class="cc-tool-arrow">เปิด →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="tune analyze" data-keywords="quick tune delta pid cli" data-accent="amber" href="/quick-tune">
-          <div class="cc-tool-top"><span class="cc-tool-icon">ϟ</span><span class="cc-tool-badge">FAST</span></div>
-          <div class="cc-tool-title">Quick Tune Pad</div><div class="cc-tool-desc">แปลงอาการเป็น PID delta และ CLI อย่างรวดเร็ว</div><span class="cc-tool-arrow">เปิด →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="setup tune" data-keywords="betaflight wizard setup cli filter pid rates" href="/bf-wizard">
-          <div class="cc-tool-top"><span class="cc-tool-icon">◈</span><span class="cc-tool-badge">GUIDE</span></div>
-          <div class="cc-tool-title">Betaflight Wizard</div><div class="cc-tool-desc">ตั้งค่าทีละขั้นจากพื้นฐานไปจนถึง CLI พร้อมใช้งาน</div><span class="cc-tool-arrow">เริ่ม Wizard →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="tune" data-keywords="rpm filter harmonics dshot motor frequency" href="/rpm-filter">
-          <div class="cc-tool-top"><span class="cc-tool-icon">◎</span></div>
-          <div class="cc-tool-title">RPM Filter</div><div class="cc-tool-desc">คำนวณ harmonic และตรวจความสัมพันธ์กับรอบมอเตอร์</div><span class="cc-tool-arrow">คำนวณ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="tune" data-keywords="rates rates visualizer rc expo super rate throttle" data-accent="purple" href="/rates-visualizer">
-          <div class="cc-tool-top"><span class="cc-tool-icon">╱</span></div>
-          <div class="cc-tool-title">Rates Visualizer</div><div class="cc-tool-desc">เห็น curve และผลของ rates แบบเข้าใจง่าย</div><span class="cc-tool-arrow">ดูกราฟ →</span>
-        </a>
-
-        <a class="cc-tool" data-cc-tool data-category="analyze setup" data-keywords="cli surgeon diff dump betaflight cli analyze" href="/cli_surgeon">
-          <div class="cc-tool-top"><span class="cc-tool-icon">›_</span></div>
-          <div class="cc-tool-title">CLI Surgeon</div><div class="cc-tool-desc">อ่าน dump / diff แล้วหา setting สำคัญ</div><span class="cc-tool-arrow">ตรวจ CLI →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="analyze setup" data-keywords="cli comparator compare configuration diff" href="/cli-comparator">
-          <div class="cc-tool-top"><span class="cc-tool-icon">⇄</span></div>
-          <div class="cc-tool-title">CLI Comparator</div><div class="cc-tool-desc">เทียบ config สองชุดให้เห็นความต่าง</div><span class="cc-tool-arrow">เปรียบเทียบ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="hardware" data-keywords="motor propeller kv stator thrust" href="/motor-prop">
-          <div class="cc-tool-top"><span class="cc-tool-icon">✥</span></div>
-          <div class="cc-tool-title">Motor × Prop</div><div class="cc-tool-desc">ประเมินชุดมอเตอร์และใบพัดให้เหมาะกับ class</div><span class="cc-tool-arrow">คำนวณ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="hardware" data-keywords="esc checker esc compatibility current dshot" data-accent="cyan" href="/esc-checker">
-          <div class="cc-tool-top"><span class="cc-tool-icon">▦</span></div>
-          <div class="cc-tool-title">ESC Checker</div><div class="cc-tool-desc">เช็กข้อจำกัดและความเข้ากันของ ESC / motor setup</div><span class="cc-tool-arrow">ตรวจ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="hardware" data-keywords="battery health ir sag voltage capacity mah c rating" href="/battery-health">
-          <div class="cc-tool-top"><span class="cc-tool-icon">▰</span></div>
-          <div class="cc-tool-title">Battery Health</div><div class="cc-tool-desc">ประเมิน IR, sag และ health score จากข้อมูลแบต</div><span class="cc-tool-arrow">เช็กแบต →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="hardware analyze" data-keywords="motor thermal temperature heat d term noise" data-accent="red" href="/motor-thermal">
-          <div class="cc-tool-top"><span class="cc-tool-icon">♨</span></div>
-          <div class="cc-tool-title">Motor Thermal</div><div class="cc-tool-desc">ประเมินความเสี่ยงความร้อนและสาเหตุที่ควรตรวจ</div><span class="cc-tool-arrow">ตรวจ →</span>
-        </a>
-
-        <a class="cc-tool" data-cc-tool data-category="hardware setup" data-keywords="vtx video transmitter bands channels power smartaudio" data-accent="cyan" href="/vtx">
-          <div class="cc-tool-top"><span class="cc-tool-icon">◉</span></div>
-          <div class="cc-tool-title">VTX Bands</div><div class="cc-tool-desc">ตาราง band / channel และข้อมูลที่เกี่ยวข้อง</div><span class="cc-tool-arrow">เปิด →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="hardware setup" data-keywords="vtx range power range transmitter" href="/vtx-range">
-          <div class="cc-tool-top"><span class="cc-tool-icon">⌁</span></div>
-          <div class="cc-tool-title">VTX Range</div><div class="cc-tool-desc">ช่วยประเมินช่วงกำลังส่งและระยะใช้งาน</div><span class="cc-tool-arrow">เปิด →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="hardware setup" data-keywords="smartaudio vtx uart command" href="/vtx-smartaudio">
-          <div class="cc-tool-top"><span class="cc-tool-icon">⌘</span></div>
-          <div class="cc-tool-title">SmartAudio</div><div class="cc-tool-desc">รวมคำสั่ง SmartAudio ที่ใช้บ่อย</div><span class="cc-tool-arrow">เปิด →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="setup hardware" data-keywords="osd designer overlay canvas osd" data-accent="purple" href="/osd">
-          <div class="cc-tool-top"><span class="cc-tool-icon">▣</span></div>
-          <div class="cc-tool-title">OSD Designer</div><div class="cc-tool-desc">ออกแบบหน้าจอ OSD และส่งออกไปใช้งานต่อ</div><span class="cc-tool-arrow">ออกแบบ →</span>
-        </a>
-
-        <a class="cc-tool" data-cc-tool data-category="setup hardware" data-keywords="fpv gear equipment guide shopping build" href="/fpv-gear">
-          <div class="cc-tool-top"><span class="cc-tool-icon">◌</span><span class="cc-tool-badge">GUIDE</span></div>
-          <div class="cc-tool-title">FPV Gear Guide</div><div class="cc-tool-desc">ค้นหาอุปกรณ์ตาม class และสไตล์การบิน</div><span class="cc-tool-arrow">ดูอุปกรณ์ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="setup" data-keywords="build card drone specifications share" href="/build-card">
-          <div class="cc-tool-top"><span class="cc-tool-icon">▤</span></div>
-          <div class="cc-tool-title">Build Card</div><div class="cc-tool-desc">สร้างการ์ดสเปกบิลด์ไว้แชร์หรือเก็บเป็นข้อมูล</div><span class="cc-tool-arrow">สร้าง →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="setup community" data-keywords="tuning log journal history records" href="/tuning-log">
-          <div class="cc-tool-top"><span class="cc-tool-icon">☷</span></div>
-          <div class="cc-tool-title">Tuning Log</div><div class="cc-tool-desc">บันทึกการเปลี่ยนค่าและผลลัพธ์แต่ละเที่ยวบิน</div><span class="cc-tool-arrow">บันทึก →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="analyze tune" data-keywords="loop analyzer latency loop control response" href="/loop-analyzer">
-          <div class="cc-tool-top"><span class="cc-tool-icon">↻</span></div>
-          <div class="cc-tool-title">Loop Analyzer</div><div class="cc-tool-desc">ดูเส้นทาง latency ตั้งแต่ stick → control loop → motor</div><span class="cc-tool-arrow">วิเคราะห์ →</span>
-        </a>
-
-        <a class="cc-tool" data-cc-tool data-category="learn" data-keywords="flight trainer practice fpv learning" href="/fpv-trainer">
-          <div class="cc-tool-top"><span class="cc-tool-icon">✈</span></div>
-          <div class="cc-tool-title">FPV Trainer</div><div class="cc-tool-desc">ฝึกทักษะการบินด้วยบทเรียนและโจทย์</div><span class="cc-tool-arrow">ฝึกบิน →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="learn" data-keywords="flight quiz rates style pilot freestyle cinematic racing" href="/flight-quiz">
-          <div class="cc-tool-top"><span class="cc-tool-icon">?</span><span class="cc-tool-badge">NEW</span></div>
-          <div class="cc-tool-title">Flight Style Quiz</div><div class="cc-tool-desc">ตอบคำถามแล้วหาแนวทาง rates ที่เหมาะกับสไตล์</div><span class="cc-tool-arrow">ทำแบบทดสอบ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="community" data-keywords="leaderboard community config ranking" href="/leaderboard">
-          <div class="cc-tool-top"><span class="cc-tool-icon">♛</span></div>
-          <div class="cc-tool-title">Config Leaderboard</div><div class="cc-tool-desc">ดูอันดับและมีส่วนร่วมกับ config จากชุมชน</div><span class="cc-tool-arrow">ดูอันดับ →</span>
-        </a>
-        <a class="cc-tool" data-cc-tool data-category="community" data-keywords="downloads diff cli dump library firmware f4 f7" href="/downloads">
-          <div class="cc-tool-top"><span class="cc-tool-icon">⇩</span><span class="cc-tool-badge">LIBRARY</span></div>
-          <div class="cc-tool-title">CLI / DIFF Library</div><div class="cc-tool-desc">รวมไฟล์ตัวอย่างสำหรับอุปกรณ์และ firmware ที่มีในคลัง</div><span class="cc-tool-arrow">เปิดคลัง →</span>
-        </a>
+        {% endfor %}
       </div>
     </section>
-
     <section class="cc-section" aria-labelledby="flow-title">
       <div class="cc-section-head">
         <div><h2 id="flow-title">วิธีใช้ให้คุ้มที่สุด</h2><p>ระบบถูกออกแบบให้เดินจาก “อาการ” → “หลักฐาน” → “การเปลี่ยนค่า”</p></div>
