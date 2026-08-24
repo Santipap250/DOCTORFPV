@@ -1,8 +1,0 @@
-diff --git a/app.py b/app.py
---- a/app.py
-+++ b/app.py
-@@
--from flask import (Flask, render_template, request, send_from_directory,
--                   abort, send_file, jsonify, url_for)
- from flask import (Flask, render_template, request, send_from_directory,
-                    abort, send_file, jsonify, url_for)
