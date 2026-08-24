@@ -1,136 +1,109 @@
-# 🚀 ConfigDoctor
-## FPV Drone Configuration Analyzer
+# OBIX ConfigDoctor
 
-**ConfigDoctor** คือเว็บเครื่องมือสำหรับช่วยวิเคราะห์และตรวจสอบการตั้งค่า (Configuration) ของโดรน FPV และระบบที่เกี่ยวข้อง  
-เพื่อช่วยให้ผู้ใช้สามารถปรับแต่ง แก้ไข และเข้าใจค่าต่าง ๆ ได้ง่ายขึ้น
+**FPV Diagnostic & Tuning Command Center**
 
-โปรเจกต์นี้ถูกออกแบบมาเพื่อรองรับทั้ง **มือใหม่** และ **นักบิน FPV ระดับโปร**  
-โดยมุ่งเน้นให้การตั้งค่าโดรนเป็นเรื่องที่เข้าใจง่ายขึ้น ลดความผิดพลาด และช่วยให้การจูนโดรนมีประสิทธิภาพมากขึ้น
+OBIX ConfigDoctor is a mobile-first web toolkit for FPV pilots. It brings configuration analysis, tuning guidance, Blackbox analysis, CLI tools, rates, battery/motor calculations, VTX utilities and FPV knowledge into one workflow.
 
----
+## Live
 
-## 🌐 Live Website
+- https://configdoctor.onrender.com
 
-https://configdoctor.vercel.app
-https://configdoctor.onrender.com
+## Core workflow
 
----
+**Identify → Verify → Change → Test → Log**
 
-## ✨ Features
+Start with the symptom or task, use evidence where possible, change one variable at a time, then record the result.
 
-### 🔧 Drone Configuration Analysis
-ตรวจสอบค่าการตั้งค่าโดรน เช่น
+## Main tool groups
 
-- Motor KV
-- Frame Size
-- Battery Type
-- PID Configuration
-- Flight Controller Settings
+- Drone configuration analysis
+- PID / filter guidance
+- Quick tuning
+- RPM filter
+- Rates visualization
+- Betaflight configuration wizard
+- Motor / propeller analysis
+- Battery and thrust calculations
+- Blackbox CSV analysis
+- CLI Surgeon and CLI comparison
+- OSD designer
+- VTX tools
+- FPV training / knowledge
+- Build and tuning logs
 
-ระบบจะช่วยวิเคราะห์และแนะนำค่าที่เหมาะสมกับการใช้งาน
-
----
-
-### 📊 Drone Performance Calculation
-คำนวณข้อมูลสำคัญของโดรน เช่น
-
-- Thrust Ratio
-- Estimated Flight Time
-- Battery Efficiency
-- Motor Performance
-
----
-
-### 🧠 Smart Suggestion System
-ระบบแนะนำค่าที่เหมาะสมตามสถานการณ์ใช้งาน เช่น
-
-- PID Tuning
-- Motor Compatibility
-- Battery Configuration
-- Frame Recommendation
-
----
-
-### 🪖 Military Mode (Experimental)
-โหมดพิเศษสำหรับการวิเคราะห์ระบบโดรนขั้นสูง
-
-คุณสมบัติหลัก:
-
-- Drone System Analysis
-- Flight Assessment
-- Pre-flight Checklist
-- Simulation Tools
-
-> ⚠️ โหมดนี้อยู่ในขั้นทดลอง
-
----
-
-### 📱 Mobile Friendly
-เว็บไซต์ถูกออกแบบให้ใช้งานได้ดีบนทุกอุปกรณ์ เช่น
-
-- โทรศัพท์มือถือ
-- แท็บเล็ต
-- คอมพิวเตอร์
-
----
-
-## 🖥️ Technology Stack
-
-### Frontend
-- HTML5
-- CSS3
-- JavaScript
-
-### Backend
-- Python
-- Flask
-
-### Hosting
-- Render
-
-### Version Control
-- GitHub
-
----
-
-## 📂 Project Structure
+## Architecture
 
 ```text
-configdoctor
-│
+DOCTORFPV/
 ├── app.py
+├── core.py
+├── analyzer/
+├── blueprints/
+├── logic/
+│   └── tool_registry.py
+├── templates/
+├── static/
+├── data/
+├── tests/
 ├── requirements.txt
-├── README.md
-│
-├── templates
-│   ├── index.html
-│   └── military_mode.html
-│
-└── static
-    ├── css
-    │   └── military.css
-    └── js
-        └── military.js
-``````
-🔮 Future Features
-แผนพัฒนาในอนาคตของ ConfigDoctor
-AI PID Tuning
-FPV Drone Database
-Motor & Propeller Calculator
-Blackbox Log Analyzer
-FPV Setup Guide
-Drone Build Assistant
-``````
-👨‍💻 Developer
-Developed by
-SanTiPapHacker
-GitHub
-https://github.com/Santipap250⁠�
-Project
-OBIX Config Lab
-ConfigDoctor AI
-© Copyright
-Copyright © 2026 Santipap.
-All rights reserved.
-This software, source code, design, graphics, documentation, and related materials are the intellectual property of Santipap.
-Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohibited.์
+├── requirements-dev.txt
+├── Procfile
+└── render.yaml
+```
+
+### Canonical Tool Registry
+
+`logic/tool_registry.py` is the canonical metadata source for public tools.
+
+It feeds:
+
+- the Tool Launcher
+- Command Center
+- sitemap generation
+- tool search/filter metadata
+
+API/internal/system endpoints must not be added to the public registry merely because they are Flask routes.
+
+## Local development
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS/Termux: source .venv/bin/activate
+
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+## Render
+
+Production uses:
+
+```text
+Runtime: Python
+Build: pip install -r requirements.txt
+Start: Gunicorn
+Health: /healthz
+Region: Singapore
+```
+
+`render.yaml` documents the intended deployment configuration. Review existing Render environment variables before syncing a Blueprint.
+
+Render's HTTP health check should remain lightweight and return a 2xx response without doing expensive analysis or external-service calls.
+
+## Data / persistence
+
+SQLite is suitable for the current lightweight deployment, but Render filesystem storage is not a substitute for durable application data. If community data becomes important, migrate durable state to a managed database and define a backup/restore procedure.
+
+## Security
+
+The application currently uses security controls including CSRF protection, rate limiting, secure cookie settings, security headers, upload limits and path containment checks. Keep secrets in Render environment variables and never commit `.env` files.
+
+## Tuning safety
+
+Recommendations are starting points, not guarantees. Inspect props, motors, ESCs, battery condition and Blackbox evidence before making aggressive changes. Change one variable at a time and keep a known-good configuration backup.
+
+## License / ownership
+
+Copyright © 2026 Santipap / OBIX Config Lab.

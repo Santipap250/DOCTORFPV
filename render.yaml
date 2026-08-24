@@ -1,0 +1,25 @@
+# OBIX ConfigDoctor — Render Blueprint
+# Production baseline. Sync this Blueprint with the existing CONFIGDOCTOR
+# service only after reviewing the environment variables in Render.
+services:
+  - type: web
+    name: configdoctor
+    runtime: python
+    region: singapore
+    plan: free
+    branch: main
+    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 60 --preload --max-requests 1000 --max-requests-jitter 100 --access-logfile - --error-logfile -
+    healthCheckPath: /healthz
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: BASE_URL
+        value: https://configdoctor.onrender.com
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: FLASK_ENV
+        value: production
+      - key: FORCE_INSECURE
+        value: "0"
