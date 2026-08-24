@@ -56,10 +56,10 @@
           <span class="cc-search-icon" aria-hidden="true">⌕</span>
         </div>
       </div>
-      <div class="cc-filter-row" role="tablist" aria-label="หมวดเครื่องมือ">
-        <button class="cc-filter is-active" type="button" data-cc-filter="all">ALL</button>
+      <div class="cc-filter-row" role="group" aria-label="หมวดเครื่องมือ">
+        <button class="cc-filter is-active" type="button" data-cc-filter="all" aria-pressed="true">ALL</button>
         {% for cat in tool_registry | map(attribute='category') | unique | list %}
-        <button class="cc-filter" type="button" data-cc-filter="{{ cat | lower }}">{{ cat }}</button>
+        <button class="cc-filter" type="button" data-cc-filter="{{ cat | lower }}" aria-pressed="false">{{ cat }}</button>
         {% endfor %}
       </div>
       <span data-cc-count style="color:#60736c;font:700 9px 'JetBrains Mono',monospace">tools</span>
@@ -71,7 +71,7 @@
         <span class="cc-section-tag">Launch Pad</span>
       </div>
 
-      <div class="cc-tools">
+      <div class="cc-tools" data-cc-tools-grid>
         {% set launcher_excluded = ['about', 'team', 'changelog'] %}
         {% set accent_by_category = {'HW': 'cyan', 'VIDEO': 'purple', 'EXPLORE': 'amber'} %}
         {% for t in tool_registry if t.id not in launcher_excluded %}
@@ -89,6 +89,11 @@
           <span class="cc-tool-arrow">เปิดเครื่องมือ →</span>
         </a>
         {% endfor %}
+      </div>
+      <div class="dc-state" data-cc-empty hidden>
+        <span aria-hidden="true" style="font-size:28px">🔍</span>
+        <div class="dc-state__title">ไม่พบเครื่องมือที่ตรงกับคำค้นหา</div>
+        <div class="dc-state__desc">ลองคำค้นอื่น หรือกด "ALL" เพื่อดูเครื่องมือทั้งหมด</div>
       </div>
     </section>
     <section class="cc-section" aria-labelledby="flow-title">
