@@ -387,8 +387,7 @@ TOOL_REGISTRY = [
         'firmware_dependency': False,
         'keywords': ['leaderboard', 'vote', 'config'],
     },
-    {
-        'id': 'military_uas',
+    {       
         'route': '/military-uas',
         'label': 'Military UAS Analyzer',
         'description': 'วิเคราะห์โดรนทหาร · physics engine',
