@@ -110,7 +110,10 @@ body.cc-page::before{
 .cc-tool-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cc-tool-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:rgba(53,239,145,.08);
   color:var(--tool-accent,var(--cc-green));border:1px solid rgba(53,239,145,.14);font-size:18px}
+.cc-tool-icon svg{width:20px;height:20px}
 .cc-tool-badge{font:800 8px var(--cc-font-display);letter-spacing:.08em;color:var(--cc-green);border:1px solid rgba(53,239,145,.2);padding:4px 7px;border-radius:999px}
+.cc-tool-badge--beta{color:var(--cc-amber);border-color:rgba(255,200,87,.3)}
+.cc-tool-badge--experimental{color:var(--cc-red);border-color:rgba(255,100,125,.3)}
 .cc-tool-title{font:800 13px/1.25 var(--cc-font-display);letter-spacing:.02em}
 .cc-tool-desc{color:var(--cc-muted);font-size:12px;line-height:1.55}
 .cc-tool-arrow{margin-top:auto;color:#62776f;font-size:14px}
