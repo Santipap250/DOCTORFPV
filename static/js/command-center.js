@@ -4,6 +4,7 @@
   const filters = [...document.querySelectorAll("[data-cc-filter]")];
   const tools = [...document.querySelectorAll("[data-cc-tool]")];
   const count = document.querySelector("[data-cc-count]");
+  const emptyState = document.querySelector("[data-cc-empty]");
   let active = "all";
 
   function normalize(v){ return String(v || "").toLowerCase().trim(); }
@@ -21,11 +22,16 @@
       if(show) visible++;
     });
     if(count) count.textContent = `${visible} tools`;
+    if(emptyState) emptyState.hidden = visible !== 0;
   }
 
   filters.forEach(btn => btn.addEventListener("click", () => {
     active = normalize(btn.dataset.ccFilter);
-    filters.forEach(b => b.classList.toggle("is-active", b === btn));
+    filters.forEach(b => {
+      const isActive = b === btn;
+      b.classList.toggle("is-active", isActive);
+      b.setAttribute("aria-pressed", String(isActive));
+    });
     apply();
   }));
 
