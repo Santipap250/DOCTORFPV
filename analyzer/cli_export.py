@@ -16,10 +16,15 @@ from datetime import datetime
 import json
 import logging
 
+from logic.firmware_compat import (
+    resolve_tier, param_name, dyn_notch_range_keyword, firmware_note,
+    GYRO_LPF1, GYRO_LPF2, DTERM_LPF1, DTERM_LPF2, DYN_NOTCH_MAX,
+)
+
 logger = logging.getLogger(__name__)
 
 
-def build_cli_diff(analysis: Dict[str, Any]) -> str:
+def build_cli_diff(analysis: Dict[str, Any], firmware_version: str = None) -> str:
     """
     สร้าง Betaflight CLI diff output จาก analysis dict
     
@@ -30,6 +35,11 @@ def build_cli_diff(analysis: Dict[str, Any]) -> str:
             - style: flight style (freestyle/racing/longrange)
             - weight_class: detected drone class
             - prop_result: propeller analysis result (optional)
+        firmware_version (str, optional): detected/selected Betaflight version
+            e.g. "4.4.3". When given, filter `set` parameter names are chosen
+            to match that firmware's actual CLI syntax (see
+            logic/firmware_compat.py). Defaults to current-generation naming
+            when not provided.
     
     Returns:
         str: CLI snippet พร้อมให้ copy-paste ไป Betaflight Configurator
@@ -50,10 +60,12 @@ def build_cli_diff(analysis: Dict[str, Any]) -> str:
         style = analysis.get("style", "freestyle").lower()
         weight_class = analysis.get("weight_class", "unknown")
         prop_result = analysis.get("prop_result", {})
+        tier = resolve_tier(firmware_version)
         
         # เตรียม lines สำหรับ CLI
         lines = [
             "# OBIXConfig Doctor - Generated PID/Filter Diff",
+            firmware_note(tier, firmware_version),
             f"# Style: {style}",
             f"# Weight Class: {weight_class}",
             f"# Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -108,13 +120,25 @@ def build_cli_diff(analysis: Dict[str, Any]) -> str:
         dterm_lpf1 = filt.get("dterm_lpf1", filt.get("dterm_lowpass", 120))
         dyn_notch = filt.get("dyn_notch", filt.get("notch", None))
         
-        lines.append(f"set gyro_lpf2_hz = {int(gyro_lpf2)}")
-        lines.append(f"set dterm_lpf1_hz = {int(dterm_lpf1)}")
+        gyro_lpf2_param = param_name(GYRO_LPF2, tier)
+        dterm_lpf1_param = param_name(DTERM_LPF1, tier)
+        if gyro_lpf2_param:
+            lines.append(f"set {gyro_lpf2_param} = {int(gyro_lpf2)}")
+        if dterm_lpf1_param:
+            lines.append(f"set {dterm_lpf1_param} = {int(dterm_lpf1)}")
         
         if dyn_notch and dyn_notch != "None":
             try:
                 dyn_notch_val = int(dyn_notch)
-                lines.append(f"set dyn_notch_range_hz = {dyn_notch_val}")
+                if tier == "legacy":
+                    # Pre-4.0 Betaflight takes a LOW/MEDIUM/HIGH keyword, not a Hz value
+                    keyword = dyn_notch_range_keyword(dyn_notch_val)
+                    if keyword:
+                        lines.append(f"set dyn_notch_range = {keyword}")
+                else:
+                    dyn_notch_param = param_name(DYN_NOTCH_MAX, tier)
+                    if dyn_notch_param:
+                        lines.append(f"set {dyn_notch_param} = {dyn_notch_val}")
             except (ValueError, TypeError):
                 pass
         
@@ -421,7 +445,9 @@ def export_to_json(analysis: Dict[str, Any], include_cli: bool = True) -> str:
     Export analysis + snapshot + optional CLI เป็น JSON format
     
     Args:
-        analysis (dict): ผลจาก analyze_drone()
+        analysis (dict): ผลจาก analyze_drone() — may include an optional
+            "firmware_version" key (e.g. "4.4.3") to target that firmware's
+            CLI syntax; defaults to current-generation naming if absent.
         include_cli (bool): รวม CLI diff ใน JSON หรือไม่
     
     Returns:
@@ -433,7 +459,7 @@ def export_to_json(analysis: Dict[str, Any], include_cli: bool = True) -> str:
         }
         
         if include_cli:
-            export_data["cli_diff"] = build_cli_diff(analysis)
+            export_data["cli_diff"] = build_cli_diff(analysis, firmware_version=analysis.get("firmware_version"))
         
         # Add raw analysis (useful for debugging)
         export_data["analysis_keys"] = list(analysis.keys())
