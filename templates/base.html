@@ -27,7 +27,10 @@
 {% set _chrome %}{% block show_shared_chrome %}true{% endblock %}{% endset %}
 {% block before_nav %}{% endblock %}
 {% if _chrome | trim == "true" %}{% include "partials/nav.html" %}{% endif %}
-{% if _chrome | trim == "true" %}{% include "partials/page_actions.html" %}{% endif %}
+{# Universal breadcrumb + Back/Home/Dashboard bar removed by request — was
+   redundant with the ConfigDoctor logo (already links home), the TOOLS
+   launcher (full search + navigation), and the browser's own back button.
+   partials/page_actions.html is kept on disk in case it's wanted again. #}
 {% block content %}{% endblock %}
 {% if _chrome | trim == "true" %}{% include "partials/footer_nav.html" %}{% endif %}
 <script src="{{ url_for('static', filename='js/patterns.js') }}" defer></script>
