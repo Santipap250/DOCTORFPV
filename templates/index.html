@@ -386,7 +386,7 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
     <input type="hidden" name="weight"      id="fWt"  value="{{ _fv.get('weight','720') }}">
     <input type="hidden" name="motor_count" value="{{ _fv.get('motor_count','4') }}">
     <input type="hidden" name="blades"      value="{{ _fv.get('blades','3') }}">
-    <input type="hidden" name="bf_version"  id="fBfv" value="{{ _fv.get('bf_version','4.4') }}">
+    <input type="hidden" name="bf_version"  id="fBfv" value="{{ _fv.get('bf_version','4.4.3') }}">
 
     <!-- 1. FRAME SIZE -->
     <div class="fld">
@@ -489,12 +489,12 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
         </div>
         <div>
           <label class="adv-l">Betaflight Version</label>
-          <div class="bfv-row">
-            <div class="bfv" data-v="4.2" onclick="setBfv('4.2',this)">≤4.2</div>
-            <div class="bfv" data-v="4.3" onclick="setBfv('4.3',this)">4.3</div>
-            <div class="bfv on" data-v="4.4" onclick="setBfv('4.4',this)">4.4</div>
-            <div class="bfv" data-v="4.5" onclick="setBfv('4.5',this)">4.5</div>
+          <div class="bfv-row" role="radiogroup" aria-label="Betaflight version">
+            <div class="bfv" data-v="3.5.7" role="radio" tabindex="0" aria-checked="false" onclick="setBfv('3.5.7',this)">3.x</div>
+            <div class="bfv" data-v="4.1.0" role="radio" tabindex="0" aria-checked="false" onclick="setBfv('4.1.0',this)">4.0–4.2</div>
+            <div class="bfv on" data-v="4.4.3" role="radio" tabindex="0" aria-checked="true" onclick="setBfv('4.4.3',this)">4.3+</div>
           </div>
+          <div class="anote" id="bfvHint">CLI จะใช้ชื่อ parameter ตาม firmware tier ที่เลือก</div>
         </div>
         <div>
           <label class="adv-l">Preset Build (เลือกเพื่อ autofill)</label>
@@ -559,7 +559,7 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
 {% set _eff  = adv.efficiency_class | default('nominal') %}
 {% set _mh   = adv.motor_health | default('') %}
 {% set _esc  = analysis.esc_recommended_a | default(adv.esc_recommended_a) | default(0) | int %}
-{% set _bfv  = request.form.get('bf_version','4.4') %}
+{% set _bfv  = analysis.firmware_version | default(request.form.get('bf_version','4.4.3')) %}
 {% if _rpm > 0 %}{% set _rfmin = [[80,(_rpm*0.22*7/60)|int]|max,600]|min %}
 {% else %}{% set _rfmin = 100 %}{% endif %}
 {% set _accurate = _kv > 0 %}
@@ -671,63 +671,11 @@ pre::-webkit-scrollbar-thumb{background:rgba(0,255,68,.2);border-radius:2px}
     <span class="cli-ic">⌨️</span>
     <div>
       <div class="cli-title">CLI COMMANDS — พร้อมวาง Betaflight</div>
-      <div class="cli-sub">{{ _sy|capitalize }} · {{ _sz }}" · BF{{ _bfv }} · paste → Enter → save</div>
+      <div class="cli-sub">{{ _sy|capitalize }} · {{ _sz }}" · {{ analysis.firmware_label | default("Betaflight 4.3.0+") }} · paste → Enter → save</div>
     </div>
     <button type="button" class="cli-copy" onclick="cpEl('fullcli');toast('✓ คัดลอกแล้ว!')">📋 คัดลอกทั้งหมด</button>
   </div>
-  <pre class="cli" id="fullcli"><span class="cli-comment"># ════════════════════════════════════════
-# ConfigDoctor — {{ _sz }}" {{ _cls|capitalize }} · {{ _cells }}S{{ _vnom|round(1) }}V
-# {{ _kv or '—' }}KV · {{ _wt|int }}g · {{ _sy|capitalize }} · TWR {{ _twr|round(2) }}:1
-# ════════════════════════════════════════
-
-# ── PID ─────────────────────────────────</span>
-set p_roll  = {{ analysis.pid.roll.p }}
-set i_roll  = {{ analysis.pid.roll.i }}
-set d_roll  = {{ analysis.pid.roll.d }}
-set f_roll  = {{ analysis.pid.roll.f | default(100) }}
-set p_pitch = {{ analysis.pid.pitch.p }}
-set i_pitch = {{ analysis.pid.pitch.i }}
-set d_pitch = {{ analysis.pid.pitch.d }}
-set f_pitch = {{ analysis.pid.pitch.f | default(100) }}
-set p_yaw   = {{ analysis.pid.yaw.p }}
-set i_yaw   = {{ analysis.pid.yaw.i }}
-{% if _bfv=='4.5' %}set iterm_relax_type          = SETPOINT
-set iterm_relax_cutoff        = 15
-set feedforward_smooth_factor = 65{% elif _bfv=='4.3' %}set iterm_relax_type     = SETPOINT
-set iterm_relax_cutoff   = 12{% else %}set iterm_relax_type          = SETPOINT
-set iterm_relax_cutoff        = 15{% if _bfv != '4.2' %}
-set feedforward_smooth_factor = 60{% endif %}{% endif %}
-
-<span class="cli-comment"># ── FILTER ── (parameter names match Betaflight {{ analysis.cli_meta.tier_label }})</span>
-set {{ analysis.cli_meta.gyro_lpf1 }}   = {{ analysis.filter.gyro_lpf1 or 0 }}
-{% if analysis.cli_meta.tier == '4.3+' %}set gyro_lpf1_type        = {{ 'PT2' if _sy=='racing' else 'PT1' }}
-{% endif %}set {{ analysis.cli_meta.gyro_lpf2 }}   = {{ analysis.filter.gyro_lpf2 or 0 }}
-set {{ analysis.cli_meta.dterm_lpf1 }}  = {{ analysis.filter.dterm_lpf1 or 0 }}
-{% if analysis.cli_meta.tier == '4.3+' %}set dterm_lpf1_type       = {{ 'PT2' if _sy=='racing' else 'PT1' }}
-{% endif %}set {{ analysis.cli_meta.dterm_lpf2 }}  = {{ analysis.filter.dterm_lpf2 or 0 }}
-<span class="cli-comment"># dyn_notch range: {{ 'ปรับตาม Motor KV ที่กรอกจริง' if analysis.filter.dyn_notch_source=='motor_kv' else 'ค่าเริ่มต้นตามคลาสโดรน — กรอก Motor KV เพื่อความแม่นยำสูงสุด' }}</span>
-{% if analysis.cli_meta.supports_dyn_notch_count %}set dyn_notch_count       = {{ analysis.filter.dyn_notch or 1 }}
-{% endif %}{% if analysis.cli_meta.dyn_notch_min %}set {{ analysis.cli_meta.dyn_notch_min }}      = {{ analysis.filter.dyn_notch_min or 80 }}
-{% endif %}{% if analysis.cli_meta.dyn_notch_max %}set {{ analysis.cli_meta.dyn_notch_max }}      = {{ analysis.filter.dyn_notch_max or 400 }}
-{% endif %}set dyn_notch_q           = {{ '300' if _bfv=='4.5' else '250' }}
-
-<span class="cli-comment"># ── RPM FILTER ──────────────────────────</span>
-set motor_pwm_protocol    = DSHOT600
-set dshot_bidir           = {{ 'ON' if analysis.filter.rpm_filter else 'OFF' }}
-set motor_poles           = 14
-set rpm_filter_harmonics  = 3
-set rpm_filter_q          = 500
-set rpm_filter_min_hz     = {{ _rfmin }}
-
-<span class="cli-comment"># ── MISC ────────────────────────────────</span>
-set anti_gravity_gain     = {{ analysis.filter.anti_gravity or 5 }}
-set anti_gravity_mode     = SMOOTH
-set tpa_rate              = {{ '55' if _sy=='racing' else ('70' if _sy=='longrange' else '65') }}
-set tpa_breakpoint        = 1300
-set feedforward_roll      = {{ '120' if _sy=='racing' else ('75' if _sy=='longrange' else '100') }}
-set feedforward_pitch     = {{ '120' if _sy=='racing' else ('75' if _sy=='longrange' else '100') }}
-
-save</pre>
+  <pre class="cli" id="fullcli">{{ analysis.cli_meta.cli | default('# CLI output unavailable') }}</pre>
 </div>
 
 <!-- Compact PID visual -->
@@ -1054,10 +1002,16 @@ window.syncSc=function(style){
 };
 
 window.setBfv=function(v,btn){
-  document.querySelectorAll('.bfv').forEach(function(b){b.classList.remove('on')});
-  if(btn)btn.classList.add('on');
+  document.querySelectorAll('.bfv').forEach(function(b){b.classList.remove('on');b.setAttribute('aria-checked','false')});
+  if(btn){btn.classList.add('on');btn.setAttribute('aria-checked','true')}
   var e=g('fBfv');if(e)e.value=v;
+  var h=g('bfvHint');
+  if(h)h.textContent=v.indexOf('3.')===0?'Legacy: ใช้ dyn_notch_range แบบ LOW/MEDIUM/HIGH':(v.indexOf('4.1')===0?'BF 4.0–4.2: ใช้ dyn_notch_min_hz / dyn_notch_max_hz':'BF 4.3+: ใช้ dyn_notch_min_hz / dyn_notch_max_hz และ modern LPF names');
 };
+function bindBfvKeyboard(){
+  var items=[].slice.call(document.querySelectorAll('.bfv'));
+  items.forEach(function(el,idx){el.addEventListener('keydown',function(ev){var next=idx;if(ev.key==='ArrowRight'||ev.key==='ArrowDown')next=Math.min(items.length-1,idx+1);else if(ev.key==='ArrowLeft'||ev.key==='ArrowUp')next=Math.max(0,idx-1);else if(ev.key==='Enter'||ev.key===' '){setBfv(el.dataset.v,el);ev.preventDefault();return}else return;setBfv(items[next].dataset.v,items[next]);items[next].focus();ev.preventDefault()})});
+}
 
 window.cpEl=function(id){
   var el=g(id);if(!el)return;var t=el.textContent||el.innerText;
@@ -1091,7 +1045,7 @@ window.onAnalyzeSubmit=function(form){
 
 document.addEventListener('DOMContentLoaded',function(){
   var bs=g('battSel');if(bs)window.syncBp(bs.value||'4S');
-  var bv=g('fBfv');if(bv){document.querySelectorAll('.bfv').forEach(function(c){c.classList.remove('on');if(c.dataset.v===bv.value)c.classList.add('on')})}
+  var bv=g('fBfv');if(bv){var active=null;document.querySelectorAll('.bfv').forEach(function(c){var on=c.dataset.v===bv.value;c.classList.toggle('on',on);c.setAttribute('aria-checked',on?'true':'false');if(on)active=c});if(!active)active=document.querySelector('.bfv.on');if(active)window.setBfv(active.dataset.v,active)}bindBfvKeyboard();
   window.liveCalc&&window.liveCalc();
   var form=g('aForm');
   if(form)form.querySelectorAll('input[type="number"]').forEach(function(i){i.addEventListener('input',window.dCalc,{passive:true})});
