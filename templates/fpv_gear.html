@@ -397,7 +397,7 @@ body::before{content:'';position:fixed;inset:0;
               {{ cat_icons.get(p.category,'•') }} {{ cat_labels.get(p.category, p.category) }}
             </span>
             {% if is_matched %}<span class="matched-badge">✓ MATCHED</span>
-            {% elif badge %}<span class="badge-pill badge-{{ badge | replace(' ','\ ') }}">{{ badge }}</span>
+            {% elif badge %}<span class="badge-pill badge-{{ badge | replace(' ','-') }}">{{ badge }}</span>
             {% endif %}
           </div>
 
