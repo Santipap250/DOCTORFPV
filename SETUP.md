@@ -244,16 +244,21 @@ configdoctor-/
 │   └── ...
 │
 ├── logic/                # Core business logic
-│   └── presets.py
+│   ├── presets.py
+│   ├── tool_registry.py  # single source of truth for all tools (nav, sitemap, command center, JSON-LD)
+│   └── firmware_compat.py # Betaflight version → CLI parameter name mapping
 │
 ├── templates/            # HTML templates (40+ files)
-│   ├── index.html
-│   ├── landing.html
+│   ├── base.html          # shared layout — all pages extend this
+│   ├── landing.html       # Command Center (renders from tool_registry)
 │   ├── pid_advisor.html
 │   └── ...
 │
 ├── static/               # Static assets
 │   ├── css/
+│   │   ├── tokens.css     # canonical design tokens — single source of truth
+│   │   ├── patterns.css   # reusable dc-* component library
+│   │   └── ...
 │   ├── js/
 │   └── downloads/
 │       ├── osd/
@@ -262,7 +267,7 @@ configdoctor-/
 ├── data/                 # Data directory (created on startup)
 │   └── community.db      # SQLite database
 │
-├── tests/                # Test suite (for future)
+├── tests/                # Test suite (365 tests)
 │   └── test_*.py
 │
 └── README.md            # Project documentation
@@ -281,7 +286,9 @@ configdoctor-/
 | `TRUST_PROXY` | 1 | Trust X-Forwarded-For headers |
 | `FORCE_INSECURE` | 0 | Allow insecure cookies (dev only) |
 | `REDIS_URL` | empty | Redis connection (optional) |
-| `DATABASE_PATH` | data/community.db | SQLite database path |
+| `COMMUNITY_DB_PATH` | data/community.db | SQLite database path (preferred name) |
+| `DATABASE_PATH` | data/community.db | Legacy alias for `COMMUNITY_DB_PATH`, still read if that's unset |
+| `BASE_URL` | Render URL | Base URL used for sitemap/robots/OG/canonical tags |
 
 ---
 
