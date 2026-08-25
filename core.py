@@ -25,6 +25,8 @@ from analyzer.thrust_logic import (calculate_thrust_weight,
                                     estimate_battery_runtime_detail)
 from werkzeug.utils import secure_filename
 from analyzer.cli_surgeon import analyze_dump as cli_analyze_dump
+from analyzer.cli_export import build_cli_diff
+from logic.firmware_compat import resolve_tier, normalize_version, TIER_LABELS
 
 
 # ── Logger init — MUST be first before any try/except import blocks ───────
@@ -456,6 +458,8 @@ def _parse_analysis_form():
     battery_mAh       = safe_int(request.form.get("battery_mAh"), None)
     motor_count       = safe_int(request.form.get("motor_count"), 4)
     motor_kv          = safe_int(request.form.get("motor_kv"), None)
+    bf_version_raw    = request.form.get("bf_version", "4.4")
+    bf_version        = normalize_version(bf_version_raw) or "4.4"
     weight      = max(10.0, weight)
     motor_count = max(1, motor_count)
 
@@ -486,7 +490,7 @@ def _parse_analysis_form():
         prop_size=prop_size, blade_count=blade_count, prop_pitch=prop_pitch,
         battery_mAh=battery_mAh, motor_count=motor_count, motor_kv=motor_kv,
         payload_g=payload_g, prop_thrust_g=prop_thrust_g,
-        esc_current_limit_a=esc_current_limit_a,
+        esc_current_limit_a=esc_current_limit_a, bf_version=bf_version,
     )
 
 
@@ -511,6 +515,7 @@ def _handle_analysis_get_params():
     battery_mAh = safe_int(a.get("battery_mAh"), None) or None
     motor_count = max(1, safe_int(a.get("motor_count"), 4))
     motor_kv    = safe_int(a.get("motor_kv"), None) or None
+    bf_version  = normalize_version(a.get("bf_version")) or "4.4"
 
     style = _normalize_style(style_raw)
 
@@ -539,7 +544,7 @@ def _handle_analysis_get_params():
         prop_size=prop_size, blade_count=blade_count, prop_pitch=prop_pitch,
         battery_mAh=battery_mAh, motor_count=motor_count, motor_kv=motor_kv,
         detected_class=detected_class, class_meta=class_meta,
-        preset_used=None, warnings=warnings,
+        preset_used=None, warnings=warnings, bf_version=bf_version,
     ))
 
     try:
@@ -569,6 +574,21 @@ def _handle_analysis_get_params():
     except Exception:
         analysis.setdefault("secret_sauce", [])
 
+    analysis["firmware_version"] = bf_version
+    tier = resolve_tier(bf_version)
+    analysis["firmware_tier"] = tier
+    analysis["firmware_label"] = TIER_LABELS[tier]
+    try:
+        analysis["cli_meta"] = {
+            "firmware_version": bf_version,
+            "tier": tier,
+            "label": TIER_LABELS[tier],
+            "cli": build_cli_diff(analysis, firmware_version=bf_version),
+        }
+    except Exception:
+        logger.exception("Firmware-aware GET CLI generation error")
+        analysis["cli_meta"] = {"firmware_version": bf_version, "tier": tier, "label": TIER_LABELS[tier], "cli": "# CLI generation unavailable"}
+
     return analysis
 
 
@@ -583,6 +603,7 @@ def _handle_analysis_post():
     prop_thrust_g        = p["prop_thrust_g"]
     esc_current_limit_a  = p["esc_current_limit_a"]
     preset_key           = p["preset_key"]
+    bf_version           = p.get("bf_version") or "4.4"
 
     warnings = validate_input(size, weight, prop_size, prop_pitch, blade_count, battery,
                                motor_kv=motor_kv, motor_count=motor_count, battery_mAh=battery_mAh,
@@ -774,6 +795,32 @@ def _handle_analysis_post():
     analysis["motor_kv"]      = motor_kv
     analysis["battery_mAh"]   = battery_mAh   # FIX-B: store for template use
     analysis["weight"]         = weight         # FIX-C: store for template use
+
+    # Firmware-aware CLI: generate once on the server so the template never
+    # has to duplicate Betaflight compatibility logic.
+    try:
+        tier = resolve_tier(bf_version)
+        analysis["firmware_version"] = bf_version
+        analysis["firmware_tier"] = tier
+        analysis["firmware_label"] = TIER_LABELS[tier]
+        analysis["cli_meta"] = {
+            "firmware_version": bf_version,
+            "tier": tier,
+            "label": TIER_LABELS[tier],
+            "cli": build_cli_diff(analysis, firmware_version=bf_version),
+        }
+    except Exception:
+        logger.exception("Firmware-aware CLI generation error")
+        analysis["firmware_version"] = bf_version
+        analysis["firmware_tier"] = resolve_tier(bf_version)
+        analysis["firmware_label"] = TIER_LABELS[analysis["firmware_tier"]]
+        analysis["cli_meta"] = {
+            "firmware_version": bf_version,
+            "tier": analysis["firmware_tier"],
+            "label": analysis["firmware_label"],
+            "cli": "# CLI generation unavailable — check server logs",
+        }
+
     logger.info("analysis keys: %s", list(analysis.keys()))
     return analysis
 
