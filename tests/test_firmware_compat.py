@@ -2,11 +2,19 @@
 """Tests for logic/firmware_compat.py and its use in analyzer/cli_export.py."""
 
 from logic.firmware_compat import (
-    resolve_tier, param_name, dyn_notch_range_keyword, firmware_note,
-    GYRO_LPF1, GYRO_LPF2, DTERM_LPF1, DTERM_LPF2, DYN_NOTCH_MAX,
+    normalize_version, resolve_tier, param_name, dyn_notch_range_keyword, firmware_note,
+    GYRO_LPF1, GYRO_LPF2, DTERM_LPF1, DTERM_LPF2, DYN_NOTCH_MIN, DYN_NOTCH_MAX,
     TIER_LEGACY, TIER_4_0, TIER_4_3,
 )
 from analyzer.cli_export import build_cli_diff
+
+
+def test_normalize_version_accepts_common_inputs():
+    assert normalize_version("4.4.3") == "4.4.3"
+    assert normalize_version("BF4.4") == "4.4"
+    assert normalize_version("Betaflight 4.2.11") == "4.2.11"
+    assert normalize_version("auto") is None
+    assert normalize_version("garbage") is None
 
 
 def test_resolve_tier_legacy():
@@ -42,10 +50,14 @@ def test_param_name_dterm_lpf1_differs_by_tier():
     assert param_name(DTERM_LPF1, TIER_4_3) == "dterm_lpf1_static_hz"
 
 
-def test_dyn_notch_max_has_no_legacy_equivalent():
+def test_dyn_notch_names_are_not_dynamic_lpf_names():
+    assert param_name(DYN_NOTCH_MIN, TIER_LEGACY) is None
     assert param_name(DYN_NOTCH_MAX, TIER_LEGACY) is None
+    assert param_name(DYN_NOTCH_MIN, TIER_4_0) == "dyn_notch_min_hz"
     assert param_name(DYN_NOTCH_MAX, TIER_4_0) == "dyn_notch_max_hz"
-    assert param_name(DYN_NOTCH_MAX, TIER_4_3) == "gyro_lpf1_dyn_max_hz"
+    assert param_name(DYN_NOTCH_MIN, TIER_4_3) == "dyn_notch_min_hz"
+    assert param_name(DYN_NOTCH_MAX, TIER_4_3) == "dyn_notch_max_hz"
+    assert "dyn_lpf" not in param_name(DYN_NOTCH_MAX, TIER_4_3)
 
 
 def test_dyn_notch_range_keyword_buckets():
@@ -91,7 +103,8 @@ def test_build_cli_diff_uses_modern_param_names_for_4_3_plus():
     cli = build_cli_diff(_ANALYSIS, firmware_version="4.4.3")
     assert "set gyro_lpf2_static_hz = 500" in cli
     assert "set dterm_lpf1_static_hz = 120" in cli
-    assert "set gyro_lpf1_dyn_max_hz = 500" in cli
+    assert "set dyn_notch_max_hz = 500" in cli
+    assert "gyro_lpf1_dyn_max_hz" not in cli
     # Old/incorrect param names must never appear
     assert "gyro_lpf2_hz =" not in cli
     assert "dyn_notch_range_hz" not in cli
