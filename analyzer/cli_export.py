@@ -18,7 +18,7 @@ import logging
 
 from logic.firmware_compat import (
     resolve_tier, param_name, dyn_notch_range_keyword, firmware_note,
-    GYRO_LPF2, DTERM_LPF1, DYN_NOTCH_MAX,
+    GYRO_LPF1, GYRO_LPF2, DTERM_LPF1, DTERM_LPF2, DYN_NOTCH_MIN, DYN_NOTCH_MAX,
 )
 
 logger = logging.getLogger(__name__)
@@ -110,31 +110,43 @@ def build_cli_diff(analysis: Dict[str, Any], firmware_version: str = None) -> st
         # ===== Filter Configuration =====
         lines.append("")
         lines.append("# --- Filter Configuration ---")
-        
-        gyro_lpf2 = filt.get("gyro_lpf2", filt.get("gyro_cutoff", 90))
-        dterm_lpf1 = filt.get("dterm_lpf1", filt.get("dterm_lowpass", 120))
-        dyn_notch = filt.get("dyn_notch", filt.get("notch", None))
-        
-        gyro_param = param_name(GYRO_LPF2, tier)
-        dterm_param = param_name(DTERM_LPF1, tier)
-        if gyro_param:
-            lines.append(f"set {gyro_param} = {int(gyro_lpf2)}")
-        if dterm_param:
-            lines.append(f"set {dterm_param} = {int(dterm_lpf1)}")
-        
-        if dyn_notch not in (None, "", "None"):
+        gyro_lpf1 = filt.get("gyro_lpf1", 0) or 0
+        gyro_lpf2 = filt.get("gyro_lpf2", filt.get("gyro_cutoff", 90)) or 0
+        dterm_lpf1 = filt.get("dterm_lpf1", filt.get("dterm_lowpass", 120)) or 0
+        dterm_lpf2 = filt.get("dterm_lpf2", 0) or 0
+        dyn_notch_min = filt.get("dyn_notch_min")
+        dyn_notch_max = filt.get("dyn_notch_max", filt.get("dyn_notch"))
+        for table, value in ((GYRO_LPF1, gyro_lpf1), (GYRO_LPF2, gyro_lpf2), (DTERM_LPF1, dterm_lpf1)):
+            name = param_name(table, tier)
+            if name:
+                lines.append(f"set {name} = {int(value)}")
+        p_dterm2 = param_name(DTERM_LPF2, tier)
+        if p_dterm2 and dterm_lpf2:
+            lines.append(f"set {p_dterm2} = {int(dterm_lpf2)}")
+        if tier == "4.3+":
+            lines.append("set gyro_lpf1_type = PT1")
+            lines.append("set dterm_lpf1_type = PT1")
+        pmin = param_name(DYN_NOTCH_MIN, tier)
+        pmax = param_name(DYN_NOTCH_MAX, tier)
+        if dyn_notch_min is not None and pmin:
+            try: lines.append(f"set {pmin} = {int(dyn_notch_min)}")
+            except (TypeError, ValueError): pass
+        if dyn_notch_max is not None:
             try:
-                dyn_notch_val = int(dyn_notch)
-                dyn_param = param_name(DYN_NOTCH_MAX, tier)
+                dv = int(dyn_notch_max)
                 if tier == "legacy":
-                    kw = dyn_notch_range_keyword(dyn_notch_val)
-                    if kw:
-                        lines.append(f"set dyn_notch_range = {kw}")
-                elif dyn_param:
-                    lines.append(f"set {dyn_param} = {dyn_notch_val}")
-            except (ValueError, TypeError):
-                pass
-        
+                    kw = dyn_notch_range_keyword(dv)
+                    if kw: lines.append(f"set dyn_notch_range = {kw}")
+                elif pmax:
+                    lines.append(f"set {pmax} = {dv}")
+            except (TypeError, ValueError): pass
+        if tier == "4.3+" and filt.get("dyn_notch_count") is not None:
+            try: lines.append(f"set dyn_notch_count = {int(filt.get('dyn_notch_count'))}")
+            except (TypeError, ValueError): pass
+        if filt.get("dyn_notch_q") is not None and tier != "legacy":
+            try: lines.append(f"set dyn_notch_q = {int(filt.get('dyn_notch_q'))}")
+            except (TypeError, ValueError): pass
+
         # ===== Flight Characteristics =====
         lines.append("")
         lines.append("# --- Flight Characteristics ---")
