@@ -28,7 +28,7 @@ body.cc-page::before{
   background-size:40px 40px;
   mask-image:linear-gradient(to bottom,black,transparent 78%);
 }
-.cc-shell{position:relative;z-index:1;max-width:var(--cc-max);margin:0 auto;padding:0 18px 92px}
+.cc-shell{position:relative;z-index:1;max-width:var(--cc-max);margin:0 auto;padding:0 18px calc(92px + env(safe-area-inset-bottom))}
 .cc-top{
   position:sticky;top:0;z-index:40;
   margin:0 -18px;
@@ -142,7 +142,7 @@ body.cc-page::before{
 .cc-footer-links a:hover{color:var(--cc-green)}
 
 .cc-mobile-dock{
-  position:fixed;left:10px;right:10px;bottom:10px;z-index:100;
+  position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:100;
   display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:6px;
   border:1px solid rgba(255,255,255,.09);background:rgba(6,10,13,.88);
   backdrop-filter:blur(18px);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45)
