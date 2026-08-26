@@ -32,5 +32,6 @@ def test_bf43plus_cli_uses_modern_names():
     cli=build_cli_diff(ANALYSIS,"4.4.3")
     assert "set gyro_lpf2_static_hz = 500" in cli
     assert "set dterm_lpf1_static_hz = 120" in cli
-    assert "set gyro_lpf1_dyn_max_hz = 500" in cli
+    assert "set dyn_notch_max_hz = 500" in cli
+    assert "gyro_lpf1_dyn_max_hz" not in cli
     assert "dyn_notch_range_hz" not in cli
