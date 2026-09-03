@@ -1,10 +1,12 @@
 (() => {
   "use strict";
+
   const search = document.querySelector("[data-cc-search]");
   const filters = [...document.querySelectorAll("[data-cc-filter]")];
   const tools = [...document.querySelectorAll("[data-cc-tool]")];
   const count = document.querySelector("[data-cc-count]");
   const emptyState = document.querySelector("[data-cc-empty]");
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
   let active = "all";
 
   const normalize = (value) => String(value || "").toLowerCase().trim();
@@ -12,15 +14,22 @@
   function applyFilters() {
     const query = normalize(search?.value);
     let visible = 0;
+
     tools.forEach((tool) => {
       const category = normalize(tool.dataset.category);
-      const haystack = normalize(`${tool.textContent} ${tool.dataset.category} ${tool.dataset.keywords}`);
+      const haystack = normalize(
+        `${tool.textContent} ${tool.dataset.category} ${tool.dataset.keywords}`
+      );
       const matchesQuery = !query || haystack.includes(query);
-      const matchesCategory = active === "all" || category.split(/\s+/).includes(active);
+      const matchesCategory =
+        active === "all" || category.split(/\s+/).includes(active);
       const show = matchesQuery && matchesCategory;
+
       tool.classList.toggle("hidden", !show);
+      tool.setAttribute("aria-hidden", String(!show));
       if (show) visible += 1;
     });
+
     if (count) count.textContent = `${visible} tools`;
     if (emptyState) emptyState.hidden = visible !== 0;
   }
@@ -44,21 +53,40 @@
       const selector = trigger.getAttribute("href");
       const target = selector ? document.querySelector(selector) : null;
       if (!target) return;
+
       event.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-      window.setTimeout(() => target.querySelector("input")?.focus({ preventScroll: true }), 300);
+      target.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+
+      const focusSearch = () =>
+        target.querySelector("input")?.focus({ preventScroll: true });
+
+      if (reducedMotion) {
+        focusSearch();
+      } else {
+        window.setTimeout(focusSearch, 300);
+      }
     });
   });
 
   document.addEventListener("keydown", (event) => {
     const activeElement = document.activeElement;
-    const typing = activeElement && ["INPUT", "TEXTAREA", "SELECT"].includes(activeElement.tagName);
+    const typing =
+      activeElement &&
+      ["INPUT", "TEXTAREA", "SELECT"].includes(activeElement.tagName);
+
     if (event.key === "/" && !typing) {
       event.preventDefault();
       search?.focus();
     }
-    if (event.key === "Escape" && activeElement === search) search.blur();
+
+    if (event.key === "Escape" && activeElement === search) {
+      search.blur();
+    }
   });
 
+  // Apply immediately so the launcher never presents a stale zero-count state.
   applyFilters();
 })();
