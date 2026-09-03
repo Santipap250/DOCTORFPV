@@ -110,19 +110,29 @@ def build_cli_diff(analysis: Dict[str, Any], firmware_version: str = None) -> st
         # ===== Filter Configuration =====
         lines.append("")
         lines.append("# --- Filter Configuration ---")
-        gyro_lpf1 = filt.get("gyro_lpf1", 0) or 0
-        gyro_lpf2 = filt.get("gyro_lpf2", filt.get("gyro_cutoff", 90)) or 0
-        dterm_lpf1 = filt.get("dterm_lpf1", filt.get("dterm_lowpass", 120)) or 0
-        dterm_lpf2 = filt.get("dterm_lpf2", 0) or 0
+        # Preserve the distinction between an explicit numeric value (including 0)
+        # and None, which means the analyzer did not provide a recommendation.
+        # Never turn None into a destructive-looking CLI command such as
+        # ``set gyro_lpf2_static_hz = 0``.
+        gyro_lpf1 = filt.get("gyro_lpf1", 0)
+        gyro_lpf2 = filt["gyro_lpf2"] if "gyro_lpf2" in filt else filt.get("gyro_cutoff", 90)
+        dterm_lpf1 = filt["dterm_lpf1"] if "dterm_lpf1" in filt else filt.get("dterm_lowpass", 120)
+        dterm_lpf2 = filt.get("dterm_lpf2")
         dyn_notch_min = filt.get("dyn_notch_min")
         dyn_notch_max = filt.get("dyn_notch_max", filt.get("dyn_notch"))
         for table, value in ((GYRO_LPF1, gyro_lpf1), (GYRO_LPF2, gyro_lpf2), (DTERM_LPF1, dterm_lpf1)):
             name = param_name(table, tier)
-            if name:
-                lines.append(f"set {name} = {int(value)}")
+            if name and value is not None:
+                try:
+                    lines.append(f"set {name} = {int(value)}")
+                except (TypeError, ValueError):
+                    logger.warning("Skipping invalid filter value for %s: %r", name, value)
         p_dterm2 = param_name(DTERM_LPF2, tier)
-        if p_dterm2 and dterm_lpf2:
-            lines.append(f"set {p_dterm2} = {int(dterm_lpf2)}")
+        if p_dterm2 and dterm_lpf2 is not None:
+            try:
+                lines.append(f"set {p_dterm2} = {int(dterm_lpf2)}")
+            except (TypeError, ValueError):
+                logger.warning("Skipping invalid D-term LPF2 value: %r", dterm_lpf2)
         if tier == "4.3+":
             lines.append("set gyro_lpf1_type = PT1")
             lines.append("set dterm_lpf1_type = PT1")
