@@ -272,3 +272,55 @@ body.cc-page::before {
 @media (max-width: 560px) {
   .cc-hero-note { align-items: flex-start; font-size: 8px; }
 }
+
+
+/* Mobile fallback: some embedded Android browsers report a desktop CSS viewport
+   even when the physical device is narrow. Keep the landing page mobile-first
+   whenever the input device is touch-capable. */
+html,
+body.cc-page { -webkit-text-size-adjust: 100%; }
+.cc-console-top,
+.cc-console-bottom { flex-wrap: wrap; }
+.cc-console-stat span { min-width: 0; }
+.cc-console-stat strong { margin-left: auto; white-space: nowrap; }
+
+@media (hover: none) and (pointer: coarse) {
+  .cc-shell {
+    max-width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: calc(94px + env(safe-area-inset-bottom));
+  }
+  .cc-top {
+    margin-left: -14px;
+    margin-right: -14px;
+    padding: 10px 14px;
+  }
+  .cc-brand { min-width: 0; }
+  .cc-brand img { height: 34px; max-width: 154px; }
+  .cc-brand-copy { display: none; }
+  .cc-top-link { display: none; }
+  .cc-status { padding: 7px 8px; font-size: 8px; letter-spacing: .08em; }
+  .cc-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto;
+    padding-top: 58px;
+    gap: 28px;
+  }
+  .cc-hero-copy { max-width: none; min-width: 0; }
+  .cc-title { max-width: 100%; font-size: 44px; line-height: .98; }
+  .cc-lead { max-width: none; font-size: 16px; line-height: 1.75; }
+  .cc-actions { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; }
+  .cc-actions .cc-btn-primary { grid-column: 1 / -1; }
+  .cc-actions .cc-btn { width: 100%; box-sizing: border-box; }
+  .cc-console { max-width: none; min-width: 0; }
+  .cc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cc-quick-grid,
+  .cc-tools,
+  .cc-flow { grid-template-columns: minmax(0, 1fr); }
+  .cc-tool,
+  .cc-tool.featured { grid-column: auto; min-height: 0; }
+  .cc-flow-card { min-height: 0; }
+  .cc-mobile-dock { display: grid; }
+}
