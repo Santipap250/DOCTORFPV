@@ -35,3 +35,45 @@ def test_bf43plus_cli_uses_modern_names():
     assert "set dyn_notch_max_hz = 500" in cli
     assert "gyro_lpf1_dyn_max_hz" not in cli
     assert "dyn_notch_range_hz" not in cli
+
+
+def test_none_optional_filter_values_are_not_emitted_as_zero():
+    analysis = {
+        "pid": ANALYSIS["pid"],
+        "filter": {
+            "gyro_lpf1": 200,
+            "gyro_lpf2": None,
+            "dterm_lpf1": 110,
+            "dterm_lpf2": None,
+            "dyn_notch_count": 2,
+            "dyn_notch_min": 80,
+            "dyn_notch_max": 400,
+        },
+        "style": "freestyle",
+    }
+
+    cli_legacy = build_cli_diff(analysis, "3.5.7")
+    cli_modern = build_cli_diff(analysis, "4.4.3")
+
+    assert "set gyro_lowpass2_hz = 0" not in cli_legacy
+    assert "set gyro_lpf2_static_hz = 0" not in cli_modern
+    assert "set dterm_lowpass2_hz = 0" not in cli_legacy
+    assert "set dterm_lpf2_static_hz = 0" not in cli_modern
+
+
+def test_explicit_zero_filter_value_is_preserved():
+    analysis = {
+        "pid": ANALYSIS["pid"],
+        "filter": {
+            "gyro_lpf1": 200,
+            "gyro_lpf2": 0,
+            "dterm_lpf1": 110,
+            "dterm_lpf2": 0,
+        },
+        "style": "freestyle",
+    }
+
+    cli = build_cli_diff(analysis, "4.4.3")
+
+    assert "set gyro_lpf2_static_hz = 0" in cli
+    assert "set dterm_lpf2_static_hz = 0" in cli
