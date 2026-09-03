@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}OBIX ConfigDoctor — FPV Command Center{% endblock %}
-{% block page_og_title %}OBIX ConfigDoctor — FPV Command Center{% endblock %}
-{% block page_og_description %}ศูนย์รวมเครื่องมือวิเคราะห์ จูน และตรวจสอบโดรน FPV สำหรับนักบินจริง ใช้งานบนมือถือได้เร็วและเป็นระบบ{% endblock %}
+{% block title %}OBIX ConfigDoctor — FPV Data & Tuning Command Center{% endblock %}
+{% block page_og_title %}OBIX ConfigDoctor — FPV Data & Tuning Command Center{% endblock %}
+{% block page_og_description %}ศูนย์รวมเครื่องมือ FPV สำหรับวิเคราะห์ จูน ตรวจสอบ และเตรียมค่า Betaflight จากข้อมูลจริงในที่เดียว{% endblock %}
 {% block page_og_path %}/landing{% endblock %}
 {% block page_nav_page %}landing{% endblock %}
 {% block page_css %}{% endblock %}
@@ -19,118 +19,100 @@
 {% block body_attrs %} class="cc-page"{% endblock %}
 
 {% block content %}
+{% set stable_count = tool_registry | selectattr('status', 'equalto', 'stable') | list | length %}
+{% set beta_count = tool_registry | selectattr('status', 'equalto', 'beta') | list | length %}
+{% set firmware_count = tool_registry | selectattr('firmware_dependency', 'equalto', true) | list | length %}
 <div class="cc-shell">
   <header class="cc-top" aria-label="ConfigDoctor command bar">
-    <a class="cc-brand" href="/landing">
+    <a class="cc-brand" href="/landing" aria-label="OBIX ConfigDoctor Home">
       <img src="{{ url_for('static', filename='img/configdoctor-landing-logo.png') }}" alt="OBIX ConfigDoctor">
-      <span class="cc-brand-copy"><strong>OBIX CONFIGDOCTOR</strong><span>FPV Diagnostic Command Center</span></span>
+      <span class="cc-brand-copy"><strong>OBIX CONFIGDOCTOR</strong><span>FPV DATA &amp; TUNING COMMAND CENTER</span></span>
     </a>
-    <span class="cc-status"><i></i> SYSTEM ONLINE</span>
+    <div class="cc-top-actions"><span class="cc-status"><i aria-hidden="true"></i> SYSTEM ONLINE</span><a class="cc-top-link" href="/app">OPEN ANALYZER <span>↗</span></a></div>
   </header>
 
   <main>
     <section class="cc-hero" aria-labelledby="cc-title">
-      <div>
-        <div class="cc-kicker">OBIX / FPV TOOL SYSTEM</div>
-        <h1 class="cc-title" id="cc-title">บินให้ดีขึ้น<span>ด้วยข้อมูล</span></h1>
-        <p class="cc-lead">ศูนย์ควบคุมสำหรับนักบิน FPV — วิเคราะห์อาการ, ตรวจ Blackbox, สร้าง CLI, คำนวณมอเตอร์/ใบพัด, เช็กแบตเตอรี่ และวางแผนการจูนในที่เดียว โดยไม่ต้องไล่หาเครื่องมือทีละหน้า</p>
+      <div class="cc-hero-copy">
+        <div class="cc-kicker">OBIX / FLIGHT DATA SYSTEM</div>
+        <h1 class="cc-title" id="cc-title">จูนจากข้อมูลจริง<span>ไม่ใช่เดาสุ่ม</span></h1>
+        <p class="cc-lead">จากอาการบนอากาศ → หลักฐานจาก Blackbox → วิเคราะห์ → ปรับค่า → ตรวจซ้ำ. ConfigDoctor รวมเครื่องมือที่นักบิน FPV ต้องใช้ไว้ใน command center เดียว พร้อมผลลัพธ์ที่นำไปทำงานต่อได้จริง</p>
         <div class="cc-actions">
-          <a class="cc-btn cc-btn-primary" href="/app">⚡ เริ่ม Drone Analyzer</a>
-          <a class="cc-btn" href="#tools" data-scroll>ค้นหาเครื่องมือ</a>
-          <a class="cc-btn cc-btn-ghost" href="/fpv">FPV Hub →</a>
+          <a class="cc-btn cc-btn-primary" href="/app"><span>⚡</span> START ANALYZER</a>
+          <a class="cc-btn" href="#mission-control" data-scroll><span>⌘</span> EXPLORE TOOLS</a>
+          <a class="cc-btn cc-btn-ghost" href="/blackbox"><span>▥</span> BLACKBOX</a>
         </div>
+        <div class="cc-proof-row" aria-label="System highlights"><span><b>01</b> Analyze</span><span><b>02</b> Verify</span><span><b>03</b> Tune</span><span><b>04</b> Repeat</span></div>
       </div>
-      <div class="cc-metrics" aria-label="Tool system metrics">
-        <div class="cc-metric"><b>{{ tool_registry | length }}</b><span>เครื่องมือเฉพาะทาง</span></div>
-        <div class="cc-metric"><b>1</b><span>ศูนย์ควบคุมเดียว</span></div>
-        <div class="cc-metric"><b>CSV</b><span>รองรับ Blackbox</span></div>
-        <div class="cc-metric"><b>CLI</b><span>พร้อมส่งออก</span></div>
+      <div class="cc-console" aria-label="ConfigDoctor preview">
+        <div class="cc-console-top"><div class="cc-console-dots" aria-hidden="true"><i></i><i></i><i></i></div><span>FLIGHT PROFILE / 5-INCH / 6S</span><span class="cc-console-live">LIVE</span></div>
+        <div class="cc-console-body">
+          <div class="cc-console-line"><span class="prompt">$</span><span>configdoctor</span><em>--analyze</em></div>
+          <div class="cc-console-stat"><span>PID RESPONSE</span><strong>STABLE</strong></div>
+          <div class="cc-console-stat"><span>FILTER STATE</span><strong>OPTIMIZABLE</strong></div>
+          <div class="cc-console-stat"><span>THERMAL HEADROOM</span><strong>GOOD</strong></div>
+          <div class="cc-console-stat"><span>BLACKBOX SIGNAL</span><strong>READY</strong></div>
+          <div class="cc-signal" aria-hidden="true">
+            <span style="--h:34%"></span><span style="--h:52%"></span><span style="--h:42%"></span><span style="--h:72%"></span><span style="--h:55%"></span><span style="--h:86%"></span><span style="--h:48%"></span><span style="--h:64%"></span><span style="--h:40%"></span><span style="--h:77%"></span><span style="--h:58%"></span><span style="--h:69%"></span><span style="--h:46%"></span><span style="--h:83%"></span><span style="--h:52%"></span><span style="--h:73%"></span>
+          </div>
+        </div>
+        <div class="cc-console-bottom"><span>DATA → DECISION</span><span>SAFE CHANGES ONLY</span></div>
       </div>
     </section>
 
-    <section class="cc-command" aria-label="Tool launcher">
-      <div class="cc-command-row">
-        <div class="cc-search-wrap">
-          <input class="cc-search" data-cc-search type="search" inputmode="search" autocomplete="off"
-                 placeholder="ค้นหาเครื่องมือ เช่น PID, RPM, Blackbox, Battery..." aria-label="ค้นหาเครื่องมือ">
-          <span class="cc-search-icon" aria-hidden="true">⌕</span>
-        </div>
-      </div>
-      <div class="cc-filter-row" role="group" aria-label="หมวดเครื่องมือ">
-        <button class="cc-filter is-active" type="button" data-cc-filter="all" aria-pressed="true">ALL</button>
-        {% for cat in tool_registry | map(attribute='category') | unique | list %}
-        <button class="cc-filter" type="button" data-cc-filter="{{ cat | lower }}" aria-pressed="false">{{ cat }}</button>
-        {% endfor %}
-      </div>
-      <span data-cc-count style="color:#60736c;font:700 9px 'JetBrains Mono',monospace">tools</span>
+    <section class="cc-stats" aria-label="Tool system overview">
+      <article><strong>{{ tool_registry | length }}</strong><span>specialized tools</span><small>รวมทั้งระบบ</small></article>
+      <article><strong>{{ stable_count }}</strong><span>stable tools</span><small>พร้อมใช้งาน</small></article>
+      <article><strong>{{ firmware_count }}</strong><span>firmware-aware</span><small>ตรวจ syntax ตาม BF</small></article>
+      <article><strong>{{ beta_count }}</strong><span>beta modules</span><small>ฟีเจอร์ที่กำลังพัฒนา</small></article>
     </section>
 
-    <section class="cc-section" id="tools" aria-labelledby="tools-title">
-      <div class="cc-section-head">
-        <div><h2 id="tools-title">Mission Control</h2><p>เลือกเครื่องมือจาก “อาการ” หรือ “งาน” ที่กำลังทำอยู่</p></div>
-        <span class="cc-section-tag">Launch Pad</span>
+    <section class="cc-quick" aria-labelledby="quick-title">
+      <div class="cc-section-head"><div><div class="cc-section-eyebrow">START HERE</div><h2 id="quick-title">เลือกจากสิ่งที่กำลังเกิดขึ้นกับเครื่อง</h2><p>ไม่ต้องรู้ชื่อเครื่องมือก่อน แค่รู้ว่าต้องการแก้อะไร</p></div></div>
+      <div class="cc-quick-grid">
+        <a class="cc-quick-card" href="/pid-advisor"><span class="cc-quick-no">01</span><span><b>บินสั่น / เด้ง / ร้อน</b><small>เริ่มจากอาการ → PID &amp; Filter</small></span><i>→</i></a>
+        <a class="cc-quick-card" href="/blackbox"><span class="cc-quick-no">02</span><span><b>มี Blackbox อยู่แล้ว</b><small>หา noise, resonance และ control issues</small></span><i>→</i></a>
+        <a class="cc-quick-card" href="/bf-wizard"><span class="cc-quick-no">03</span><span><b>กำลังประกอบเครื่องใหม่</b><small>วาง config และสร้าง CLI เป็นขั้นตอน</small></span><i>→</i></a>
+        <a class="cc-quick-card" href="/motor-prop"><span class="cc-quick-no">04</span><span><b>เลือก motor / prop / battery</b><small>เช็ก hardware ก่อนเอาขึ้นอากาศ</small></span><i>→</i></a>
       </div>
+    </section>
 
+    <section class="cc-command" id="mission-control" aria-labelledby="tools-title">
+      <div class="cc-command-head"><div><div class="cc-section-eyebrow">MISSION CONTROL</div><h2 id="tools-title">Tool Launcher</h2><p>ค้นหาเครื่องมือจากชื่อ อาการ หรือสิ่งที่ต้องการตรวจ</p></div><span class="cc-tool-count" data-cc-count>0 tools</span></div>
+      <div class="cc-search-wrap"><label class="cc-search-label" for="cc-tool-search">SEARCH TOOLS</label><div class="cc-search-field"><input id="cc-tool-search" class="cc-search" data-cc-search type="search" inputmode="search" autocomplete="off" placeholder="เช่น PID, Blackbox, RPM, Battery, Motor..." aria-label="ค้นหาเครื่องมือ"><span class="cc-search-kbd" aria-hidden="true">/</span></div></div>
+      <div class="cc-filter-row" role="group" aria-label="หมวดเครื่องมือ"><button class="cc-filter is-active" type="button" data-cc-filter="all" aria-pressed="true">ALL</button>{% for cat in tool_registry | map(attribute='category') | unique | list %}<button class="cc-filter" type="button" data-cc-filter="{{ cat | lower }}" aria-pressed="false">{{ cat }}</button>{% endfor %}</div>
       <div class="cc-tools" data-cc-tools-grid>
         {% set launcher_excluded = ['about', 'team', 'changelog'] %}
-        {% set accent_by_category = {'HW': 'cyan', 'VIDEO': 'purple', 'EXPLORE': 'amber'} %}
+        {% set accent_by_category = {'TUNE':'green','HW':'cyan','ANALYZE':'blue','VIDEO':'purple','EXPLORE':'amber'} %}
         {% for t in tool_registry if t.id not in launcher_excluded %}
-        {% set featured = t.id in ('app', 'blackbox') %}
-        <a class="cc-tool{{ ' featured' if featured else '' }}" data-cc-tool
-           data-category="{{ t.category | lower }}" data-keywords="{{ (t.keywords | join(' ')) }} {{ t.label | lower }}"
-           {% if accent_by_category.get(t.category) %}data-accent="{{ accent_by_category[t.category] }}"{% endif %}
-           href="{{ t.route }}">
-          <div class="cc-tool-top">
-            <span class="cc-tool-icon">{{ t.icon | safe }}</span>
-            {% if t.status != 'stable' %}<span class="cc-tool-badge cc-tool-badge--{{ t.status }}">{{ t.status | upper }}</span>{% endif %}
-          </div>
-          <div class="cc-tool-title">{{ t.label }}</div>
-          <div class="cc-tool-desc">{{ t.description }}</div>
-          <span class="cc-tool-arrow">เปิดเครื่องมือ →</span>
+        {% set featured = t.id in ('app','blackbox','pid_advisor') %}
+        <a class="cc-tool{{ ' featured' if featured else '' }}" data-cc-tool data-category="{{ t.category | lower }}" data-keywords="{{ (t.keywords | join(' ')) }} {{ t.label | lower }} {{ t.description | lower }}"{% if accent_by_category.get(t.category) %} data-accent="{{ accent_by_category[t.category] }}"{% endif %} href="{{ t.route }}">
+          <div class="cc-tool-top"><span class="cc-tool-index">{{ '%02d' | format(loop.index) }}</span><span class="cc-tool-icon">{{ t.icon | safe }}</span>{% if t.status != 'stable' %}<span class="cc-tool-badge cc-tool-badge--{{ t.status }}">{{ t.status | upper }}</span>{% endif %}</div>
+          <div class="cc-tool-title">{{ t.label }}</div><div class="cc-tool-desc">{{ t.description }}</div><span class="cc-tool-arrow">OPEN TOOL <span>↗</span></span>
         </a>
         {% endfor %}
       </div>
-      <div class="dc-state" data-cc-empty hidden>
-        <span aria-hidden="true" style="font-size:28px">🔍</span>
-        <div class="dc-state__title">ไม่พบเครื่องมือที่ตรงกับคำค้นหา</div>
-        <div class="dc-state__desc">ลองคำค้นอื่น หรือกด "ALL" เพื่อดูเครื่องมือทั้งหมด</div>
-      </div>
+      <div class="cc-state" data-cc-empty hidden><span class="cc-state-icon" aria-hidden="true">⌕</span><div><div class="cc-state-title">ไม่พบเครื่องมือ</div><div class="cc-state-desc">ลองคำค้นใหม่ หรือเลือก ALL เพื่อแสดงทุกเครื่องมือ</div></div></div>
     </section>
-    <section class="cc-section" aria-labelledby="flow-title">
-      <div class="cc-section-head">
-        <div><h2 id="flow-title">วิธีใช้ให้คุ้มที่สุด</h2><p>ระบบถูกออกแบบให้เดินจาก “อาการ” → “หลักฐาน” → “การเปลี่ยนค่า”</p></div>
-        <span class="cc-section-tag">Workflow</span>
-      </div>
+
+    <section class="cc-workflow" aria-labelledby="workflow-title">
+      <div class="cc-section-head"><div><div class="cc-section-eyebrow">THE OBIX METHOD</div><h2 id="workflow-title">แก้ปัญหาแบบเป็นระบบ</h2><p>เปลี่ยนจาก “ลองค่าใหม่” เป็นกระบวนการที่วัดผลได้</p></div></div>
       <div class="cc-flow">
-        <article class="cc-flow-card"><span class="cc-flow-no">01 / IDENTIFY</span><h3>เริ่มจากอาการ</h3><p>ใช้ PID Advisor หรือ Quick Tune เมื่อยังไม่รู้ว่าจะเริ่มตรวจตรงไหน</p></article>
-        <article class="cc-flow-card"><span class="cc-flow-no">02 / VERIFY</span><h3>ยืนยันด้วยข้อมูล</h3><p>ใช้ Blackbox, CLI Surgeon, Battery และ Motor Thermal เพื่อหาหลักฐาน</p></article>
-        <article class="cc-flow-card"><span class="cc-flow-no">03 / CHANGE</span><h3>ค่อยปรับแล้วบันทึก</h3><p>ใช้ Wizard / CLI / Tuning Log และทดสอบทีละตัวแปรหลังแก้ค่า</p></article>
+        <article class="cc-flow-card"><span class="cc-flow-no">01 / IDENTIFY</span><h3>ระบุอาการ</h3><p>เริ่มจากสิ่งที่เห็นจริงบนอากาศ ไม่เริ่มจากค่าที่คิดว่าน่าจะผิด</p><strong>SYMPTOM → SIGNAL</strong></article>
+        <article class="cc-flow-card"><span class="cc-flow-no">02 / VERIFY</span><h3>ยืนยันด้วยข้อมูล</h3><p>ใช้ Blackbox, hardware checks และ calculators เพื่อหาหลักฐานก่อนแก้</p><strong>SIGNAL → EVIDENCE</strong></article>
+        <article class="cc-flow-card"><span class="cc-flow-no">03 / CHANGE</span><h3>เปลี่ยนทีละตัวแปร</h3><p>สร้าง CLI หรือ config ที่ตรวจสอบได้ แล้วทดสอบอีกครั้งหลังเปลี่ยนค่า</p><strong>EVIDENCE → CHANGE</strong></article>
       </div>
     </section>
 
-    <section class="cc-safety" aria-label="Tuning safety notice">
-      <strong>⚠ TUNING SAFETY</strong>
-      <p>ค่าที่เครื่องมือแนะนำเป็นจุดเริ่มต้น ไม่ใช่การรับประกันผลกับทุก build ควรเริ่มจากค่าเดิมที่บันทึกไว้, ตรวจสภาพ prop / motor / ESC และเปลี่ยนทีละตัวแปร โดยเฉพาะ filter กับ D-term ที่เกี่ยวข้องกับความร้อนและเสถียรภาพการบิน</p>
-    </section>
+    <section class="cc-safety" aria-label="Tuning safety notice"><div class="cc-safety-mark">⚠</div><div><strong>TUNING SAFETY / READ BEFORE FLIGHT</strong><p>คำแนะนำจากเครื่องมือเป็นจุดเริ่มต้น ไม่ใช่ค่ารับประกันสำหรับทุก build ควรเก็บค่าเดิมไว้ ตรวจ prop / motor / ESC และเปลี่ยนทีละตัวแปร โดยเฉพาะ filter กับ D-term หากอุณหภูมิหรืออาการบินแย่ลงให้หยุดและย้อนกลับค่าที่บันทึกไว้</p></div></section>
+
+    <section class="cc-bottom-cta" aria-labelledby="cta-title"><div><div class="cc-section-eyebrow">READY FOR THE NEXT FLIGHT?</div><h2 id="cta-title">หยุดเดา แล้วเริ่มอ่านข้อมูล</h2><p>เปิด Analyzer แล้วเริ่มจาก build ของคุณเอง</p></div><a class="cc-btn cc-btn-primary" href="/app">OPEN DRONE ANALYZER ↗</a></section>
   </main>
 
-  <footer class="cc-footer">
-    <div class="cc-footer-copy">© 2026 OBIX Config Lab · ConfigDoctor</div>
-    <nav class="cc-footer-links" aria-label="Footer">
-      <a href="/about">เกี่ยวกับ</a><a href="/changelog">Changelog</a><a href="/team">Team</a><a href="/downloads">Downloads</a>
-    </nav>
-  </footer>
+  <footer class="cc-footer"><div class="cc-footer-copy">© 2026 OBIX Config Lab · ConfigDoctor</div><nav class="cc-footer-links" aria-label="Footer"><a href="/fpv">FPV Hub</a><a href="/fpv-gear">Gear Guide</a><a href="/about">About</a><a href="/team">Team</a><a href="/changelog">Changelog</a></nav></footer>
 </div>
 
-<nav class="cc-mobile-dock" aria-label="Quick navigation">
-  <a href="/landing" class="active"><span>⌂</span><strong>HOME</strong></a>
-  <a href="/app"><span>✦</span><strong>ANALYZE</strong></a>
-  <a href="/blackbox"><span>▥</span><strong>BLACKBOX</strong></a>
-  <a href="/pid-advisor"><span>⌁</span><strong>PID</strong></a>
-  <a href="#tools" data-scroll><span>☷</span><strong>TOOLS</strong></a>
-</nav>
+<nav class="cc-mobile-dock" aria-label="Quick navigation"><a href="/landing" class="active"><span>⌂</span><strong>HOME</strong></a><a href="/app"><span>✦</span><strong>ANALYZE</strong></a><a href="/blackbox"><span>▥</span><strong>BLACKBOX</strong></a><a href="/pid-advisor"><span>⌁</span><strong>PID</strong></a><a href="#mission-control" data-scroll><span>☷</span><strong>TOOLS</strong></a></nav>
 {% endblock %}
 
-{% block extra_scripts %}
-<script src="{{ url_for('static', filename='js/command-center.js') }}" defer></script>
-{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/command-center.js') }}" defer></script>{% endblock %}
