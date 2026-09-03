@@ -241,3 +241,34 @@ body.cc-page::before {
 .cc-actions,
 .cc-actions .cc-btn { min-width: 0; }
 .cc-actions .cc-btn { box-sizing: border-box; }
+
+
+.cc-hero-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: #789087;
+  font: 700 9px/1.5 var(--cc-font-mono);
+  letter-spacing: .03em;
+}
+.cc-hero-note-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--cc-cyan);
+  box-shadow: 0 0 12px rgba(64,207,255,.75);
+}
+.cc-tool:focus-visible,
+.cc-quick-card:focus-visible,
+.cc-btn:focus-visible,
+.cc-top-link:focus-visible,
+.cc-brand:focus-visible,
+.cc-mobile-dock a:focus-visible {
+  outline: 3px solid rgba(64,207,255,.75);
+  outline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .cc-hero-note { align-items: flex-start; font-size: 8px; }
+}
