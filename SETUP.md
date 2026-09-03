@@ -1,319 +1,225 @@
-# 🚀 ConfigDoctor — Setup Guide
+# OBIX ConfigDoctor — Setup & Release Guide
 
-## Quick Start (5 minutes)
+## 1. Clone
 
-### 1. Clone & Navigate
 ```bash
-git clone https://github.com/Santipap250/configdoctor-.git
-cd configdoctor-
+git clone https://github.com/Santipap250/DOCTORFPV.git
+cd DOCTORFPV
 ```
 
-### 2. Create Virtual Environment
+## 2. Create a virtual environment
+
 ```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-source venv/bin/activate
+python -m venv .venv
 ```
 
-### 3. Install Dependencies
+Windows:
+
 ```bash
-pip install -r requirements.txt
+.venv\Scripts\activate
 ```
 
-### 4. Setup Environment
+macOS/Linux/Termux:
+
+```bash
+source .venv/bin/activate
+```
+
+## 3. Install dependencies
+
+Runtime only:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Development/test environment:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+## 4. Environment
+
+Copy the template:
+
 ```bash
 cp .env.example .env
-
-# Edit .env and set SECRET_KEY:
-python -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32))"
 ```
 
-### 5. Create Data Directory
+Generate a secret key:
+
 ```bash
-mkdir -p data static/downloads/osd static/downloads/diff_all
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-### 6. Run Application
+For local development, set the generated value in `.env`:
+
+```text
+SECRET_KEY=your-generated-secret
+FLASK_ENV=development
+FLASK_DEBUG=0
+TRUST_PROXY=0
+FORCE_INSECURE=0
+BASE_URL=http://127.0.0.1:10000
+```
+
+Do not commit `.env`.
+
+## 5. Run locally
+
 ```bash
 python app.py
 ```
 
-✅ Open http://localhost:10000 in your browser
+Open:
 
----
-
-## 🐳 Docker Setup
-
-### Create Dockerfile
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-RUN mkdir -p data static/downloads/osd
-
-EXPOSE 10000
-
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000"]
+```text
+http://127.0.0.1:10000/landing
 ```
 
-### Build & Run
-```bash
-docker build -t configdoctor .
-docker run -p 10000:10000 \
-  -e SECRET_KEY="your-secret-key" \
-  configdoctor
+Health check:
+
+```text
+http://127.0.0.1:10000/healthz
 ```
 
----
+Expected JSON:
 
-## 🔐 Security Configuration
-
-### Generate Strong SECRET_KEY
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
+```json
+{"status":"ok"}
 ```
 
-### Set Environment Variables
-```bash
-# Production
-export SECRET_KEY="your-generated-key"
-export FLASK_ENV="production"
-export TRUST_PROXY="1"
-export FORCE_INSECURE="0"
+## 6. Run the test suite
 
-# Development only
-export FLASK_DEBUG="0"
-export FLASK_ENV="development"
+```bash
+python -m pytest -q
 ```
 
----
+Useful focused runs:
 
-## 🧪 Testing
-
-### Install Development Requirements
 ```bash
-pip install -r requirements-dev.txt
+python -m pytest tests/test_firmware_compat.py tests/test_firmware_ui.py tests/test_firmware_e2e.py -q
+python -m pytest tests/test_registry_integrity.py tests/test_healthz.py -q
 ```
 
-### Run Tests
-```bash
-pytest                          # Run all tests
-pytest -v                       # Verbose
-pytest -k "test_analyze"        # Run specific test
-pytest --cov=analyzer          # Coverage report
+GitHub Actions runs `python -m pytest -q` automatically on pushes and pull requests.
+
+## 7. Git hygiene
+
+Do not commit:
+
+```text
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+*.log
+data/*.db
 ```
 
----
+The repository `.gitignore` already excludes these paths.
 
-## 📤 Deployment
+## 8. Render deployment
 
-### Render.com Deployment
+The production service is:
 
-1. **Push to GitHub**
+```text
+https://configdoctor.onrender.com
+```
+
+The repository contains `render.yaml` with the baseline production configuration, including:
+
+- Python runtime
+- `main` branch
+- automatic deploys
+- Gunicorn
+- one worker for the current SQLite deployment
+- `/healthz` HTTP health check
+- `FLASK_DEBUG=0`
+- `FLASK_ENV=production`
+- `FORCE_INSECURE=0`
+
+Keep the production `SECRET_KEY` in Render Environment Variables. Never put it in GitHub.
+
+## 9. Release procedure
+
+Before pushing a release:
+
 ```bash
+git status
+git diff --check
+python -m pytest -q
 git add .
-git commit -m "Ready for deployment"
+git commit -m "chore: release-ready cleanup"
 git push origin main
 ```
 
-2. **Create New Web Service on Render**
-   - Connect GitHub repository
-   - Set Environment Variables:
-     ```
-     SECRET_KEY=your-secret-key
-     TRUST_PROXY=1
-     FLASK_ENV=production
-     ```
-   - Build Command: (leave empty - uses Procfile)
-   - Start Command: (leave empty - uses Procfile)
+After push:
 
-3. **Monitor Logs**
-```bash
-render logs --service configdoctor
-```
+1. Wait for GitHub Actions CI to finish green.
+2. Confirm Render deploy uses the same commit.
+3. Confirm Render is Live.
+4. Confirm `/healthz` returns HTTP 200.
+5. Confirm `/landing` and `/app` return HTTP 200.
+6. Exercise Firmware 3.x, 4.0–4.2 and 4.3+ CLI paths.
+7. Inspect Render runtime logs for startup errors, 5xx responses, worker crashes or memory pressure.
 
-### Heroku Deployment (Alternative)
+## 10. Database
 
-```bash
-heroku create configdoctor-app
-heroku config:set SECRET_KEY="your-secret-key"
-heroku config:set TRUST_PROXY="1"
-git push heroku main
-```
+SQLite is the default runtime store and uses WAL/busy-timeout settings. The current Render deployment is intentionally single-worker.
 
----
+Move to PostgreSQL when there is a concrete need for multiple workers, stronger persistence requirements, or higher concurrent write volume.
 
-## 📊 Database Setup
+## 11. Troubleshooting
 
-### SQLite (Default)
-- Automatically created at `data/community.db`
-- WAL (Write-Ahead Logging) enabled for better concurrency
-- Supports 1 writer, multiple readers
+### `ModuleNotFoundError: No module named 'flask'`
 
-### PostgreSQL (Production)
-
-For multi-worker deployment, migrate to PostgreSQL:
+Install the development dependencies:
 
 ```bash
-pip install psycopg2-binary
+python -m pip install -r requirements-dev.txt
 ```
 
-Update `app.py` database initialization.
+### Tests collect but application imports fail
 
----
+Verify the virtual environment is active and that `requirements-dev.txt` was installed from the repository root.
 
-## 🔄 Redis Setup (Optional)
+### Database permission problems
 
-For distributed rate limiting:
+Ensure the `data/` directory exists and is writable by the application process.
 
-```bash
-# Local Redis
-redis-server
+### Render deploy is live but health check is unhealthy
 
-# or with Docker
-docker run -p 6379:6379 redis:latest
+Check:
+
+```text
+/healthz
+Render runtime logs
+SECRET_KEY
+required environment variables
+startup command
 ```
 
-Set in `.env`:
+## 12. Project structure
+
+```text
+DOCTORFPV/
+├── app.py
+├── core.py
+├── analyzer/
+├── blueprints/
+├── logic/
+├── templates/
+├── static/
+├── tests/
+├── docs/
+├── .github/workflows/ci.yml
+├── render.yaml
+├── requirements.txt
+├── requirements-dev.txt
+├── pytest.ini
+├── Procfile
+└── .env.example
 ```
-REDIS_URL=redis://localhost:6379/0
-```
-
----
-
-## 📝 Troubleshooting
-
-### Issue: `ModuleNotFoundError: No module named 'flask'`
-**Solution:**
-```bash
-pip install -r requirements.txt
-```
-
-### Issue: `SECRET_KEY not set` error
-**Solution:**
-```bash
-# Generate and set in .env
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
-### Issue: Database permission denied
-**Solution:**
-```bash
-mkdir -p data
-chmod 755 data
-```
-
-### Issue: Port 10000 already in use
-**Solution:**
-```bash
-PORT=5000 python app.py
-# or
-lsof -i :10000  # find process
-kill -9 <PID>   # kill process
-```
-
----
-
-## 📦 Project Structure
-
-```
-configdoctor-/
-├── app.py                 # Main Flask application
-├── requirements.txt       # Production dependencies
-├── requirements-dev.txt   # Development dependencies
-├── setup.py              # Python package setup
-├── .env.example          # Environment template
-├── .gitignore            # Git ignore rules
-├── Procfile              # Deployment configuration
-├── pytest.ini            # Test configuration
-│
-├── analyzer/             # Analysis modules
-│   ├── prop_logic.py
-│   ├── cli_surgeon.py
-│   ├── blackbox_analyzer.py
-│   └── ...
-│
-├── logic/                # Core business logic
-│   ├── presets.py
-│   ├── tool_registry.py  # single source of truth for all tools (nav, sitemap, command center, JSON-LD)
-│   └── firmware_compat.py # Betaflight version → CLI parameter name mapping
-│
-├── templates/            # HTML templates (40+ files)
-│   ├── base.html          # shared layout — all pages extend this
-│   ├── landing.html       # Command Center (renders from tool_registry)
-│   ├── pid_advisor.html
-│   └── ...
-│
-├── static/               # Static assets
-│   ├── css/
-│   │   ├── tokens.css     # canonical design tokens — single source of truth
-│   │   ├── patterns.css   # reusable dc-* component library
-│   │   └── ...
-│   ├── js/
-│   └── downloads/
-│       ├── osd/
-│       └── diff_all/
-│
-├── data/                 # Data directory (created on startup)
-│   └── community.db      # SQLite database
-│
-├── tests/                # Test suite (365 tests)
-│   └── test_*.py
-│
-└── README.md            # Project documentation
-```
-
----
-
-## 🔧 Configuration Reference
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SECRET_KEY` | (required) | CSRF & session signing key |
-| `FLASK_DEBUG` | 0 | Enable debug mode (never in production) |
-| `FLASK_ENV` | production | Environment (production/development) |
-| `PORT` | 10000 | Server port |
-| `TRUST_PROXY` | 1 | Trust X-Forwarded-For headers |
-| `FORCE_INSECURE` | 0 | Allow insecure cookies (dev only) |
-| `REDIS_URL` | empty | Redis connection (optional) |
-| `COMMUNITY_DB_PATH` | data/community.db | SQLite database path (preferred name) |
-| `DATABASE_PATH` | data/community.db | Legacy alias for `COMMUNITY_DB_PATH`, still read if that's unset |
-| `BASE_URL` | Render URL | Base URL used for sitemap/robots/OG/canonical tags |
-
----
-
-## 📚 Additional Resources
-
-- [Flask Documentation](https://flask.palletsprojects.com/)
-- [Gunicorn Documentation](https://gunicorn.org/)
-- [Render Deployment Guide](https://docs.render.com/)
-- [FPV Drone Configuration](https://configdoctor.onrender.com/)
-
----
-
-## ✅ Checklist Before Production
-
-- [ ] Generate strong `SECRET_KEY`
-- [ ] Set `FLASK_ENV=production`
-- [ ] Set `FLASK_DEBUG=0`
-- [ ] Enable `TRUST_PROXY=1` (if behind proxy)
-- [ ] Configure `REDIS_URL` for scaling
-- [ ] Enable HTTPS/SSL
-- [ ] Test rate limiting
-- [ ] Verify database backups
-- [ ] Set up error logging
-- [ ] Monitor performance
-
----
-
-**Need Help?** Visit [GitHub Issues](https://github.com/Santipap250/configdoctor-/issues)

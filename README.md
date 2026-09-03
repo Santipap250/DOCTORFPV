@@ -1,143 +1,109 @@
-# 🚀 ConfigDoctor
-## FPV Drone Configuration Analyzer
+# OBIX ConfigDoctor
+## FPV Diagnostic & Tuning Command Center
 
-**ConfigDoctor** คือเว็บเครื่องมือสำหรับช่วยวิเคราะห์และตรวจสอบการตั้งค่า (Configuration) ของโดรน FPV และระบบที่เกี่ยวข้อง  
-เพื่อช่วยให้ผู้ใช้สามารถปรับแต่ง แก้ไข และเข้าใจค่าต่าง ๆ ได้ง่ายขึ้น
+**OBIX ConfigDoctor** เป็นเว็บแอปสำหรับช่วยนักบิน FPV วิเคราะห์การตั้งค่า ประเมินระบบโดรน และสร้างคำแนะนำ/CLI ที่ใช้งานได้ตรงกับ Betaflight firmware tier ที่เลือก
 
-โปรเจกต์นี้ถูกออกแบบมาเพื่อรองรับทั้ง **มือใหม่** และ **นักบิน FPV ระดับโปร**  
-โดยมุ่งเน้นให้การตั้งค่าโดรนเป็นเรื่องที่เข้าใจง่ายขึ้น ลดความผิดพลาด และช่วยให้การจูนโดรนมีประสิทธิภาพมากขึ้น
+เป้าหมายหลักคือทำให้การวิเคราะห์ FPV จาก “อาการหรือสเปก” ไปสู่ “เครื่องมือ → ผลวิเคราะห์ → ขั้นตอนถัดไป” ทำได้ง่ายขึ้นทั้งบนมือถือและเดสก์ท็อป
 
----
+## Live
 
-## 🌐 Live Website
+- Production: https://configdoctor.onrender.com
+- Source: https://github.com/Santipap250/DOCTORFPV
 
-https://configdoctor.vercel.app
-https://configdoctor.onrender.com
+## Current capabilities
 
----
+### Drone analysis
+- Frame size, weight, propeller, battery และ flight style analysis
+- Motor/prop, battery, thermal และ control-loop helpers
+- Performance estimates และ analysis reports
 
-## ✨ Features
+### Tuning & Betaflight
+- PID symptom advice
+- Quick tune helpers
+- Rates visualization
+- RPM filter calculations
+- Betaflight configuration wizard
+- CLI surgeon / comparator
+- Firmware-aware CLI generation
 
-### 🔧 Drone Configuration Analysis
-ตรวจสอบค่าการตั้งค่าโดรน เช่น
+### Blackbox & utilities
+- Blackbox CSV analysis
+- OSD tools
+- VTX tools
+- Build Card / Tuning Log
+- FPV gear and knowledge pages
 
-- Motor KV
-- Frame Size
-- Battery Type
-- PID Configuration
-- Flight Controller Settings
+### Firmware-aware CLI
+The analyzer accepts a Betaflight firmware version and maps CLI parameter names to the supported compatibility tier:
 
-ระบบจะช่วยวิเคราะห์และแนะนำค่าที่เหมาะสมกับการใช้งาน
+- **Legacy:** Betaflight < 4.0
+- **4.0–4.2:** Betaflight 4.0.x–4.2.x
+- **Modern:** Betaflight 4.3+
 
----
+The firmware compatibility layer is centralized in `logic/firmware_compat.py`, while CLI generation is handled by `analyzer/cli_export.py`. The web flow passes the selected version through the analyzer backend and renders the generated CLI from `analysis.cli_meta`.
 
-### 📊 Drone Performance Calculation
-คำนวณข้อมูลสำคัญของโดรน เช่น
+### Tool Registry
+Public tool/page metadata is centralized in `logic/tool_registry.py` and consumed by navigation and sitemap generation. The current public registry contains **29 entries**. Operational/API/system endpoints are intentionally not part of the registry.
 
-- Thrust Ratio
-- Estimated Flight Time
-- Battery Efficiency
-- Motor Performance
-
----
-
-### 🧠 Smart Suggestion System
-ระบบแนะนำค่าที่เหมาะสมตามสถานการณ์ใช้งาน เช่น
-
-- PID Tuning
-- Motor Compatibility
-- Battery Configuration
-- Frame Recommendation
-
----
-
-### 🪖 Military Mode (Experimental)
-โหมดพิเศษสำหรับการวิเคราะห์ระบบโดรนขั้นสูง
-
-คุณสมบัติหลัก:
-
-- Drone System Analysis
-- Flight Assessment
-- Pre-flight Checklist
-- Simulation Tools
-
-> ⚠️ โหมดนี้อยู่ในขั้นทดลอง
-
----
-
-### 📱 Mobile Friendly
-เว็บไซต์ถูกออกแบบให้ใช้งานได้ดีบนทุกอุปกรณ์ เช่น
-
-- โทรศัพท์มือถือ
-- แท็บเล็ต
-- คอมพิวเตอร์
-
----
-
-## 🖥️ Technology Stack
-
-### Frontend
-- HTML5
-- CSS3
-- JavaScript
-
-### Backend
-- Python
-- Flask
-
-### Hosting
-- Render
-
-### Version Control
-- GitHub
-
----
-
-## 📂 Project Structure
+## Architecture
 
 ```text
-configdoctor
-│
-├── app.py                 # Main Flask app — routes, security config, extensions
-├── core.py                # Shared analysis/DB logic (no Flask dependency)
-├── requirements.txt
-├── README.md / SETUP.md
-│
-├── analyzer/               # Domain analysis modules (PID, blackbox, prop, filters, CLI...)
-├── blueprints/              # Flask blueprints, grouped by tool category
+DOCTORFPV/
+├── app.py                    # Flask application + security/config
+├── core.py                   # shared analyzer/DB flow
+├── analyzer/                 # domain analysis + CLI generation
+├── blueprints/               # Flask route groups
 ├── logic/
-│   ├── tool_registry.py     # single source of truth for all 30 tools
-│   └── firmware_compat.py   # Betaflight version → CLI parameter mapping
-│
-├── templates/               # Jinja2 templates (base.html + 40+ pages)
-│   └── partials/            # nav, footer, OG/JSON-LD tags, etc.
-│
-└── static/
-    ├── css/
-    │   ├── tokens.css        # canonical design tokens
-    │   └── patterns.css      # reusable UI component library
-    ├── js/
-    └── img/
+│   ├── tool_registry.py      # canonical public tool/page registry
+│   └── firmware_compat.py    # Betaflight version → CLI mapping
+├── templates/                # Jinja templates
+├── static/                   # CSS / JS / images
+├── tests/                    # automated tests
+├── .github/workflows/ci.yml  # GitHub Actions pytest gate
+├── render.yaml               # Render deployment baseline
+├── requirements.txt          # production dependencies
+└── requirements-dev.txt      # test/development dependencies
 ```
 
----
-🔮 Future Features
-แผนพัฒนาต่อจากนี้
+## Quality gates
 
-- Firmware-version input in the UI (the analyzer already generates version-correct CLI internally — see `logic/firmware_compat.py` — but no page lets you pick a firmware version yet)
-- PostgreSQL option for multi-worker deployments (currently SQLite + WAL)
-- More device presets in the CLI Surgeon / diff library
+Before merging or deploying:
 
-👨‍💻 Developer
-Developed by
-SanTiPapHacker
-GitHub
-https://github.com/Santipap250⁠�
-Project
-OBIX Config Lab
-ConfigDoctor AI
-© Copyright
-Copyright © 2026 Santipap.
-All rights reserved.
-This software, source code, design, graphics, documentation, and related materials are the intellectual property of Santipap.
-Unauthorized copying, modification, distribution, resale, reverse engineering, or commercial use of this project without written permission is prohibited.์
+```bash
+python -m pytest -q
+```
+
+GitHub Actions runs the same command automatically on pushes and pull requests.
+
+Production should only be considered release-ready when:
+
+```text
+GitHub CI        ✅ green
+Render deploy    ✅ live
+/healthz         ✅ 200 + {"status":"ok"}
+/landing         ✅ 200
+/app             ✅ 200
+Firmware 3.x     ✅ correct legacy CLI
+Firmware 4.0–4.2 ✅ correct compatibility CLI
+Firmware 4.3+   ✅ correct modern CLI
+```
+
+## Local setup
+
+See [`SETUP.md`](SETUP.md) for the complete setup, testing and Render deployment instructions.
+
+## Security baseline
+
+The production configuration includes CSRF protection, rate limiting, secure cookie settings, request-size limits, security headers, and a dedicated `/healthz` endpoint. Never commit `.env` or production secrets.
+
+## Database
+
+The default runtime database is SQLite with WAL settings. This is suitable for the current single-worker deployment. PostgreSQL is a future scalability option for multi-worker/high-concurrency workloads.
+
+## Project identity
+
+**OBIX Config Lab**  
+Developer: **SanTiPapHacker / Santipap250**  
+Copyright © 2026 Santipap. All rights reserved.
+
+This repository is published for the project owner’s use. Redistribution, resale, or commercial reuse should follow the project owner’s chosen license/permission policy.
