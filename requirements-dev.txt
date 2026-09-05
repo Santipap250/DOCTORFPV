@@ -1,28 +1,64 @@
 # OBIXConfig Doctor — Development Requirements
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 # Development-only dependencies (NOT for production)
+
 # Usage: pip install -r requirements.txt -r requirements-dev.txt
 
+
+
 # Include all production requirements
+
 -r requirements.txt
 
+
+
 # ─── Testing ───────────────────────────────────────────────────
+
 # NOTE: pytest-flask==1.2.0 removed — it imports `flask._request_ctx_stack`,
+
 # which was removed in Flask 3.x. That import crashes at pytest startup,
+
 # taking down the entire local test run (`pip install -r requirements-dev.txt
+
 # && pytest` never even reaches collection). tests/conftest.py already
+
 # defines its own `app`/`client` fixtures, so the plugin was unused —
+
 # nothing in tests/ relies on pytest-flask-specific fixtures.
+
 pytest==7.4.0
+
 pytest-cov==4.1.0
+
 pytest-mock==3.11.1
 
+
+
 # ─── Code Quality ──────────────────────────────────────────────
+
 flake8==6.0.0
+
 pylint==2.17.5
+
 black==23.7.0
+
 isort==5.12.0
 
+
+
 # ─── Development Tools ─────────────────────────────────────────
+
 ipython==8.14.0
+
 ipdb==0.13.13
+
+
+
+# ─── Dependency Security ────────────────────────────────────────
+
+# Fail CI when a known vulnerability exists in production requirements.
+
+pip-audit==2.10.1
+
