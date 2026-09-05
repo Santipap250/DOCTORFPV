@@ -17,6 +17,8 @@
 <!-- Phase 1 — canonical design tokens + pattern library, loaded on every page -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/patterns.css') }}">
+{# Global mobile hardening: every tool page receives the same responsive baseline. #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
 {% set _page_css = self.page_css() %}
 {% if _page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/' ~ _page_css) }}">{% endif %}
 {% block extra_css_links %}{% endblock %}

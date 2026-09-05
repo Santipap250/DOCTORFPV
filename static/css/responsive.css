@@ -354,7 +354,59 @@ pre, code {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   7. REDUCED MOTION
+   7. MOBILE COMPONENT HARDENING
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+  /* Prevent component internals from establishing a wider grid than the viewport. */
+  .container, .page-wrap, .shell, .layout, .main-grid, .tool-layout,
+  .form-card, .result-card, .card, .panel, .tool-card, .v5-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Keep dense tool pages comfortable without wasting the narrow screen. */
+  .form-card, .result-card, .panel, .tool-card, .v5-card {
+    padding: 16px !important;
+  }
+
+  /* iOS/Android must not zoom or clip form controls. */
+  input, select, textarea, button {
+    max-width: 100%;
+    font-size: 16px;
+  }
+  input, select, textarea {
+    min-height: 44px;
+  }
+  textarea { resize: vertical; }
+
+  /* Action rows should wrap instead of shrinking labels into unreadable buttons. */
+  .actions, .action-row, .button-row, .form-actions, .page-actions,
+  .toolbar, .tool-actions, .result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .actions > *, .action-row > *, .button-row > *, .form-actions > *,
+  .page-actions > *, .toolbar > *, .tool-actions > *, .result-actions > * {
+    max-width: 100%;
+  }
+
+  /* Long labels, firmware values and generated CLI remain readable. */
+  .page-hero-sub, .card p, .panel p, .tool-card p, .result-card p,
+  .field-help, .help-text, .muted {
+    overflow-wrap: anywhere;
+  }
+
+  /* Keep generated exports inside a deliberate scroll surface. */
+  pre, .code-block, .cli-output, .terminal-output {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. REDUCED MOTION
    ───────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
