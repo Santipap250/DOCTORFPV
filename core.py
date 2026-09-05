@@ -13,7 +13,7 @@ import sqlite3, threading as _threading
 from datetime import datetime
 from pathlib import Path as _Path
 
-from flask import request
+from flask import request, current_app
 
 from logic.presets import (PRESETS, detect_class_from_size,
                             get_baseline_for_class, get_pid_for_class_style,
@@ -922,7 +922,12 @@ except Exception as _bb_err:
 def _cleanup_osd_files(max_age_hours: int = 24) -> None:
     """ลบไฟล์ OSD เก่ากว่า max_age_hours ออกจาก static/downloads/osd/
     เรียกก่อน save ทุกครั้งเพื่อป้องกัน disk fill"""
-    osd_dir = os.path.join(app.root_path, 'static', 'downloads', 'osd')
+    try:
+        root_path = current_app.root_path
+    except RuntimeError:
+        # Keep the helper safe for CLI/tests that call it without an app context.
+        root_path = os.path.dirname(__file__)
+    osd_dir = os.path.join(root_path, 'static', 'downloads', 'osd')
     if not os.path.isdir(osd_dir):
         return
     cutoff = time.time() - max_age_hours * 3600

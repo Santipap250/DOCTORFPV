@@ -71,6 +71,25 @@
       <article><strong>{{ beta_count }}</strong><span>beta modules</span><small>ฟีเจอร์ที่กำลังพัฒนา</small></article>
     </section>
 
+    <section class="cc-mobile-flight-desk" aria-labelledby="flight-desk-title">
+      <div class="cc-mobile-flight-desk-head">
+        <div>
+          <div class="cc-section-eyebrow">FLIGHT DESK</div>
+          <h2 id="flight-desk-title">พร้อมตรวจเครื่องของคุณ?</h2>
+        </div>
+        <span class="cc-mobile-flight-state"><i aria-hidden="true"></i>READY</span>
+      </div>
+      <div class="cc-mobile-actions" aria-label="ทางลัดสำหรับมือถือ">
+        <a class="cc-mobile-action cc-mobile-action--primary" href="/app"><span aria-hidden="true">✦</span><span><b>เริ่มวิเคราะห์</b><small>ตั้งค่า build ใหม่</small></span><strong aria-hidden="true">↗</strong></a>
+        <a class="cc-mobile-action" href="/blackbox"><span aria-hidden="true">▥</span><span><b>มี Blackbox</b><small>อ่าน flight log</small></span><strong aria-hidden="true">↗</strong></a>
+        <button class="cc-mobile-action" type="button" data-cc-focus-search><span aria-hidden="true">⌕</span><span><b>ค้นหาเครื่องมือ</b><small>PID, RPM, VTX และอีกมาก</small></span><strong aria-hidden="true">/</strong></button>
+      </div>
+      <div class="cc-recent-tools" data-cc-recent-wrap hidden>
+        <div class="cc-recent-head"><span>RECENTLY OPENED</span><button type="button" data-cc-clear-recent>ล้างประวัติ</button></div>
+        <div class="cc-recent-list" data-cc-recent aria-live="polite"></div>
+      </div>
+    </section>
+
     <section class="cc-quick" aria-labelledby="quick-title">
       <div class="cc-section-head"><div><div class="cc-section-eyebrow">START HERE</div><h2 id="quick-title">เริ่มจากสิ่งที่เกิดขึ้นกับเครื่อง</h2><p>ไม่ต้องจำชื่อเครื่องมือ แค่เลือกอาการหรือเป้าหมายของคุณ</p></div></div>
       <div class="cc-quick-grid">
@@ -83,7 +102,7 @@
 
     <section class="cc-command" id="mission-control" aria-labelledby="tools-title">
       <div class="cc-command-head"><div><div class="cc-section-eyebrow">MISSION CONTROL</div><h2 id="tools-title">เครื่องมือทั้งหมดในที่เดียว</h2><p>ค้นหาจากชื่อ อาการ หรือสิ่งที่ต้องการตรวจ</p></div><span class="cc-tool-count" data-cc-count aria-live="polite">0 tools</span></div>
-      <div class="cc-search-wrap"><label class="cc-search-label" for="cc-tool-search">SEARCH TOOLS</label><div class="cc-search-field"><input id="cc-tool-search" class="cc-search" data-cc-search type="search" inputmode="search" autocomplete="off" placeholder="เช่น PID, Blackbox, RPM, Battery, Motor..." aria-label="ค้นหาเครื่องมือ"><span class="cc-search-kbd" aria-hidden="true">/</span></div></div>
+      <div class="cc-search-wrap"><label class="cc-search-label" for="cc-tool-search">SEARCH TOOLS</label><div class="cc-search-field"><input id="cc-tool-search" class="cc-search" data-cc-search type="search" inputmode="search" autocomplete="off" placeholder="เช่น PID, Blackbox, RPM, Battery, Motor..." aria-label="ค้นหาเครื่องมือ"><button class="cc-search-clear" type="button" data-cc-clear-search aria-label="ล้างคำค้น" hidden>×</button><span class="cc-search-kbd" aria-hidden="true">/</span></div></div>
       <div class="cc-filter-row" role="group" aria-label="หมวดเครื่องมือ"><button class="cc-filter is-active" type="button" data-cc-filter="all" aria-pressed="true">ALL</button>{% for cat in tool_registry | map(attribute='category') | unique | list %}<button class="cc-filter" type="button" data-cc-filter="{{ cat | lower }}" aria-pressed="false">{{ cat }}</button>{% endfor %}</div>
       <div class="cc-tools" data-cc-tools-grid>
         {% set launcher_excluded = ['about', 'team', 'changelog'] %}
